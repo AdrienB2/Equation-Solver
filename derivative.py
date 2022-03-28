@@ -1,89 +1,106 @@
+### import des librairies utiles : tkinter et math
 import math as math
-import time as time
 import tkinter as tk
 
+def rec_eq(equat_str, x):
+    b = equat_str.replace("x", f"({str(x)})")
+    return eval(b)
+### fonction et dérivée
 
-
-def f(x): #la fonction qu'on veut voir
+# la fonction f qu'on veut avoir, dépend de la valeur x entrée
+def f(x):
+    # nouvelle fonction pour faciliter la correction de bugs
     def func(x):
-        return math.tan(x)
-    if -10000 > func(x) or func(x) > 10000:
-        return "Erreur"
+        # Définition de la fonction ici
+        return rec_eq("x**2", x)
+    # essaie de retourner la valeur de f(x)
     try:
         return float(func(x))
-    except OverflowError:
-        try:
-            return int(func(x))
-        except OverflowError:
-            return "Erreur"
-    except (ValueError, ZeroDivisionError,TypeError):
+
+    # types d'erreurs informatiques possibles (division par 0 par exemple):
+    except:
         return "Erreur"
 
+
+# la dérivée, qui va dépendre de la fonction f et de la valeur entrée x
 def derivative(f, x):
+    # regarde si f en x fait du sens (-> dérivée possible)
     if f(x) != "Erreur" or f(x+0.000000000001)!= "Erreur":
-        f1 = f(x)
-        f2 = f(x+0.000000000001)
-        res = (f2-f1)/ 0.000000000001
-        if -10000 > res or res > 10000:
-            return "Erreur"
+        # utilisation de la définition d'une dérivée ; lim h->0 {(f(a+h)-f(a)/h)}
+        f1 = f(x)           #f(a)
+        f2 = f(x+0.000000000001)            #f(a+h) h = 0.000000000001, plus petite valeur que Python supporte
+        f_deriv = (f2-f1)/ 0.000000000001       #dérivée en x 
+
+        # essaie de retourner la valeur de f'(x)
         try:
-            return float(res)
-        except OverflowError:
-            try:
-                return int(res)
-            except OverflowError:
-                return "Erreur"
-        except (ValueError, ZeroDivisionError,TypeError):
+            return float(f_deriv)
+
+        # comme pour la fonction, erreurs informatiques possibles
+        except:
             return "Erreur"
+
+    # regarde si f en x pas de sens (-> dérivée infinie -> impossible)
     else:
         return "Erreur"
 
 
+# test pour avoir les dimensions de l'écran en fullscreen
+fen_test = tk.Tk()
+h = fen_test.winfo_screenheight()  # variable qui va récupérer la hauteur maxiamale de l'écran 
+w = fen_test.winfo_screenwidth()   # variable qui va récupérer la largeur maximale de l'écran 
+fen_test.destroy()
 
-w=1900
-h=1100
-b_inf=-10        #x min
-b_sup=10        #x max
-d= 100000 #nombres de x vérifiés
-win=tk.Tk()
+b_inf = -10        # borne minimale de x dans le graphe
+b_sup = 10        # borne maximale de x dans le graphe
+d = 100000      # nombres de x vérifiés dans le graphe
+
+# fenêtre qui montre le graphe
+win = tk.Tk()
 win.title("Traceur de courbes")
 win.geometry()
-can=tk.Canvas(win,bg="white",width=w,height=h)
+
+# canvas, surface où va dessiner le graphe
+can = tk.Canvas(win, bg="white", width=w, height=h)
 can.pack()
 
+
+# fonction qui va faire le graphique 
 def grapheur(f, deriv, b_inf, b_sup, d):
+    liste = []          # liste des résultats de f(x) pour déterminer les bornes de f(x)
+    t = (b_sup-b_inf)/d         # pas de x de controle de f(x)
 
-    liste=[]
-    b_inf=b_inf-(b_sup-b_inf)/40
-    b_sup=b_sup+(b_sup-b_inf)/40
-    t=(b_sup-b_inf)/d #pas de x 
+    b_inf = b_inf - (b_sup-b_inf)/40      # adaptations estétiques
+    b_sup = b_sup + (b_sup-b_inf)/40
+
+    # boucle pour déterminer les bornes de f(x)
     for c in range(0,d+1):
-        x=b_inf+c*t
-        if f(x)!="Erreur":
-            if -100 < f(x) < 100:
-                liste.append(f(x))
-        if deriv(f, x) != "Erreur":
-            if -10 < deriv(f, x) < 10:
-                liste.append(deriv(f, x))
-
-    b=w/(b_sup-b_inf)           #multiplicateur en x
-    mn=min(liste)-(max(liste)-min(liste))/20
-    mx=max(liste)+(max(liste)-min(liste))/20
-    if mx-mn==0:
-        mx=mx+abs(0-mx)+1
-        mn=mn-abs(0-mn)-1
+        x = b_inf + c*t     # détermination de x
+        # controle si f(x) est possible
+        if f(x)!= "Erreur":
+            liste.append(f(x))
 
 
-    def i(t,inf,sup,yes):       #défini les écarts de notations en fonction de la longueur de pixels(t), la borne inférieure(inf) et supérieure(sup)
-        g=40                # écart idéal (enfin pour vous) entre les notations [pixels]
+    b = w/(b_sup-b_inf)
+    mn = min(liste) - (max(liste)-min(liste))/20        # valeur min de f   (-(max(liste)-min(liste))/20 est purement estétique)
+    mx = max(liste) + (max(liste)-min(liste))/20        # valeur max de f   (+(max(liste)-min(liste))/20 est purement estétique)
+    # Cas où la fonction est constante
+    if mx - mn == 0:
+        # redéfinition pour redimensionner le cas d'une fonction constante
+        mx = mx + abs(mx) + 1
+        mn = mn - abs(mn) - 1
+
+
+    # défini les écarts de notations en fonction de la longueur de pixels(t), la borne inférieure(inf) et supérieure(sup)
+    def i(t, inf, sup, yes):    
+        ec_pix = 50                # écart idéal (enfin pour vous) entre les notations [pixels]
         if yes==1:
             if mx!=0 and abs(mx)>=abs(mn):
-                if (abs(math.log10(abs(mx)))//1*3)>=g:
-                    g=(abs(math.log10(abs(mx)))//1*3)+10
+                if (abs(math.log10(abs(mx)))//1*3)>=ec_pix:
+                    ec_pix=(abs(math.log10(abs(mx)))//1*3)+10
             elif mn!=0 and abs(mn)>abs(mx):
-                if (abs(math.log10(abs(mn)))//1*3)>=g:
-                    g=(abs(math.log10(abs(mn)))//1*3)+10
-        x=g*(sup-inf)/t         # intervalle précis
+                if (abs(math.log10(abs(mn)))//1*3)>=ec_pix:
+                    ec_pix=(abs(math.log10(abs(mn)))//1*3)+10
+        x=ec_pix*(sup-inf)/t         # intervalle précis
         #tous les écarts entre les intevalles arrondis et les intervalles précis
         a=10**(math.log10(abs(x))//1)-abs(x)
         b=2*10**(math.log10(abs(x))//1)-abs(x)
