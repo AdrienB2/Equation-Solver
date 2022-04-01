@@ -3,7 +3,7 @@ from http.client import EXPECTATION_FAILED
 import math as math
 import matplotlib.pyplot as plt
 import numpy as np
-
+ 
 
 ### fonction et dérivée
 
