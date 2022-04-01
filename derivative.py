@@ -1,37 +1,53 @@
-### import des librairies utiles : tkinter et math
+### Import des librairies utiles : math, nummpy et matplotlib, tkinter
 import math as math
 import matplotlib.pyplot as plt
 import numpy as np
- 
- 
-### fonction et dérivée
 
-# la fonction f qu'on veut avoir, dépend de la valeur x entrée
+
+
+### Variables
+
+# le h va déterminer l'ordre de précision de la dérivée
+h = 0.000000000001
+# borne entre lesquelles la fonction sera affichée
+borneInf = -5
+borneSup = 5
+# nombres de x vérifiés dans le graphe
+d = 100000
+a = 0
+
+
+
+### Fonctions
+
+# la fonction f qu'on veut avoir pour une valeur unique (float)
 def func(x):
     # Définition de la fonction ici
     try:
         return x**6+5*x**5-4*x**4+2*x**3-100*x**2-x-10
     except:
-        return "Pas trouvé"
-        
+        return "Erreur"
 
-# la fonction f qu'on veut avoir pour matplotlib, dépend de la valeur x entrée
+# la fonction f qu'on veut avoir avec numpy (sous forme d'array)
 def f(x):
-    # Définition de la fonction ici pour numpy (pour faire un beau graphe)
+    # définition de la fonction ici pour numpy (pour faire un beau graphe)
     return x**6+5*x**5-4*x**4+2*x**3-100*x**2-x-10
+
 
 # le h va déterminer l'ordre de précision de la dérivée
 h = 0.000000000001
-# la dérivée, qui va dépendre de la fonction f et de la valeur entrée x
+# la dérivée
 def derivative(f, x):
-    # utilisation de la définition d'une dérivée ; lim h->0 {(f(a+h)-f(a)/h)}
-    f1 = f(x)           #f(a)
-    f2 = f(x+h)            #f(a+h), h = 0.000000000001, plus petite valeur que Python supporte
-    f_deriv = (f2-f1)/h       #dérivée en x par définition
-    return f_deriv
+    # utilisation de la définition de la dérivée avec la limite ; f'(a) = lim h->0 ((f(a + h) - f(a))/h)
+    f1 = f(x)
+    f2 = f(x + h) # h = 0.000000000001 est la plus petite valeur que Python supporte
+    fDerivee = (f2 - f1)/h  
+    return fDerivee
 
 
-def find_zero(f, a):
+
+# fonction qui trouve les 0
+def findZero(f, a):
     # "a" est point autour duquel la tangente se fait
     anti_bug = 0
     try:
@@ -50,18 +66,11 @@ def find_zero(f, a):
             return "Erreur"
 
 
-plt.style.use("dark_background") # fond noir car c'est plus stylax
-
-
-# borne entre lesquelles la fonction sera affichée
-borneInf = -10
-borneSup = 10
-d = 100000      # nombres de x vérifiés dans le graphe
 
 liste_zero = []
 for x in range(-20,21):
     x = x/2
-    a = find_zero(func, x)
+    a = findZero(func, x)
     if a != "Erreur":
         if len(liste_zero) == 0:
             liste_zero.append(a)
@@ -80,6 +89,10 @@ for x in range(-20,21):
 
 print(liste_zero)
 
+
+### Graphe
+
+plt.style.use("dark_background") # fond noir car c'est plus stylax
 # crée n éléments (inversement proportionnel à d) qu'on va plot dans la fonction entre les bornes choisies
 x = np.linspace(borneInf, borneSup, d)
 
@@ -93,10 +106,8 @@ ax.spines['top'].set_color('none')
 ax.xaxis.set_ticks_position('bottom')
 ax.yaxis.set_ticks_position('left')
 
-
 # plot les fonctions
-plt.plot(x, f(x), 'y', label='f(x)')
-#plt.plot(x, derivative(f, x), 'c', label="f'(x)")
+plt.plot(x, f(x), 'y', label="f(x)")
 plt.legend(loc='upper left')
 
 # affiche la fenêtre des graphes
