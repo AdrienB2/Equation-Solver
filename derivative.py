@@ -1,7 +1,6 @@
 ### import des librairies utiles : tkinter et math
 from http.client import EXPECTATION_FAILED
 import math as math
-import tkinter as tk
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -18,7 +17,7 @@ def func(x):
 
 # la fonction f qu'on veut avoir pour matplotlib, dépend de la valeur x entrée
 def f(x):
-    # Définition de la fonction ici
+    # Définition de la fonction ici pour numpy (pour faire un beau graphe)
     return np.log(x)
 
 # le h va déterminer l'ordre de précision de la dérivée
