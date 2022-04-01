@@ -1,5 +1,4 @@
 ### import des librairies utiles : tkinter et math
-from http.client import EXPECTATION_FAILED
 import math as math
 import matplotlib.pyplot as plt
 import numpy as np
@@ -11,14 +10,15 @@ import numpy as np
 def func(x):
     # Définition de la fonction ici
     try:
-        return math.log(x)
+        return x**6+5*x**5-4*x**4+2*x**3-100*x**2-x-10
     except:
         return "Pas trouvé"
+        
 
 # la fonction f qu'on veut avoir pour matplotlib, dépend de la valeur x entrée
 def f(x):
     # Définition de la fonction ici pour numpy (pour faire un beau graphe)
-    return np.log(x)
+    return x**6+5*x**5-4*x**4+2*x**3-100*x**2-x-10
 
 # le h va déterminer l'ordre de précision de la dérivée
 h = 0.000000000001
@@ -33,20 +33,21 @@ def derivative(f, x):
 
 def find_zero(f, a):
     # "a" est point autour duquel la tangente se fait
+    anti_bug = 0
     try:
-        while abs(f(a)) > h:
+        while abs(f(a)) > h and anti_bug < 10000:
             if abs(derivative(f, a)) < h:
-                return ZeroDivisionError
+                return "Erreur"
             else:
                 a = -f(a)/derivative(f, a) + a
+                anti_bug += 1
+                print(anti_bug)
         return a
     except:
         if f(0) == 0:
             return 0
         else:
-            return "\n \n Erreur du point choisi, essayez un autre point !! \n \n"
-    
-        
+            return "Erreur"
 
 
 plt.style.use("dark_background") # fond noir car c'est plus stylax
@@ -57,8 +58,28 @@ borneInf = -10
 borneSup = 10
 d = 100000      # nombres de x vérifiés dans le graphe
 
-a = find_zero(func, 1)
-print(a, func(a))
+liste_zero = []
+for x in range(-20,21):
+    x = x/2
+    a = find_zero(func, x)
+    if a != "Erreur":
+        if len(liste_zero) == 0:
+            liste_zero.append(a)
+        else:
+            removed = True
+            for zero in liste_zero:
+                if abs(zero-a) < 2*h:
+                    if func(zero) >= func(a):
+                        liste_zero.remove(zero)
+                        liste_zero.append(a)
+                        removed = False
+                        break
+                    removed = False
+            if removed:
+                liste_zero.append(a)
+
+print(liste_zero)
+
 # crée n éléments (inversement proportionnel à d) qu'on va plot dans la fonction entre les bornes choisies
 x = np.linspace(borneInf, borneSup, d)
 
