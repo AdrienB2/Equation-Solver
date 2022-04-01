@@ -4,7 +4,7 @@ import math as math
 import matplotlib.pyplot as plt
 import numpy as np
  
-
+ 
 ### fonction et dérivée
 
 # la fonction f qu'on veut avoir, dépend de la valeur x entrée
