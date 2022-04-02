@@ -1,7 +1,9 @@
 ### Import des librairies utiles : math, nummpy et matplotlib, tkinter
+from cmath import nan
 import math as math
 import matplotlib.pyplot as plt
 import numpy as np
+from numpy import e, sin, cos, tan, sqrt
 
 
 
@@ -19,15 +21,16 @@ liste_zero = []
 
 
 
+
 ### Fonctions
 
-# la fonction f qu'on veut avoir pour une valeur unique (float)
-def func(x):
+# la fonction f 
+def f(x):
     # Définition de la fonction ici
     try:
-        return np.sin(x)
+        return (3*x-2)*e**x
     except:
-        return "Erreur"
+        return nan      #not a number
 
 
 
@@ -43,14 +46,20 @@ def derivative(f, x):
     return fDerivee
 
 
+# la tangente
+def tangente(f, x, a):
+    y3 = f(a) + derivative(f, a)*(x - a)
+    return y3
+
+
 
 # fonction qui trouve les 0 avec la méthode de Newton-Raphson
-def newtonRaphson(f, a):
+def newtonRaphson(f, a, mode):
     # "a" est point autour duquel la tangente se fait
     anti_bug = 0        # possibilité d'osciller entre deux points
     try:
         # tant que la valeur f(a) n'est pas proche de 0 (ou que anti-bug est trop élevé)
-        while abs(f(a)) > h/100 and anti_bug < 10000:
+        while abs(f(a)) > h/1000 and anti_bug < 10000:
             # si la dérivée est nulle, retourne une erreur
             if abs(derivative(f, a)) == 0:
                 return "Erreur"
@@ -60,8 +69,10 @@ def newtonRaphson(f, a):
                 a = -f(a)/derivative(f, a) + a
                 # incrémentation de l'anti-bug
                 anti_bug += 1
+                if mode == 1:
+                    L.append(a)
         # si il n'y a pas d'oscillation
-        if anti_bug < 10000:
+        if anti_bug < 10000 and abs(f(a)) < h/1000:
             # si on arrive ici, alors ça veut dire que f(a) est nulle, donc c'est un zero
             return a
         # si il y a une oscillation, retourne une erreur
@@ -78,12 +89,12 @@ def newtonRaphson(f, a):
             return "Erreur"
 
 
-# determine la liste de zeros (pas tous mais la plupart)
+# determine la liste de zeros (la plupart)
 def detListeZero():
     global liste_zero
     for x in range(-20,21):
         x = x/2
-        a = newtonRaphson(func, x)
+        a = newtonRaphson(f, x, 0)
         if a != "Erreur":
             if len(liste_zero) == 0:
                 liste_zero.append(a)
@@ -92,7 +103,7 @@ def detListeZero():
                 for zero in liste_zero:
                     if abs(zero-a) < 2*h:
                         try:
-                            if func(zero) >= func(a):
+                            if f(zero) >= f(a):
                                 liste_zero.remove(zero)
                                 if abs(a-round(a)) < h or abs(round(a)-a) < h:
                                     liste_zero.append(round(a))
@@ -107,8 +118,27 @@ def detListeZero():
                 if removed:
                     liste_zero.append(a)
 
+
+
+# vérification de la liste de zéros avec la dichotomie 
+
+
+
+# liste des tangentes 
+a = 4
+L = [a]
+newtonRaphson(f, a, 1)
+
+# détermine la liste des zeros selon Newton-Raphson
 detListeZero()
 print(liste_zero)
+
+
+def zoom(event):
+    if event.button == "up":
+        print(event.button, event.xdata, event.ydata)
+    # Adjust plot limits:
+    
 
 
 
@@ -129,8 +159,12 @@ ax.xaxis.set_ticks_position('bottom')
 ax.yaxis.set_ticks_position('left')
 
 # plot les fonctions
-plt.plot(x, func(x), 'y', label="f(x)")
+plt.plot(x, f(x), 'y', label="f(x)")
 plt.legend(loc='upper left')
+fig.canvas.mpl_connect("scroll_event", zoom)
+# plot des tangentes
+for i in range(len(L)) :
+    plt.plot(x, tangente(f, x, L[i]), label="t_"+str(i))
 
 # affiche la fenêtre des graphes
 plt.show()
