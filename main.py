@@ -1,9 +1,10 @@
 ### Import des librairies utiles : math, nummpy et matplotlib, tkinter
-from cmath import nan
 import math as math
 import matplotlib.pyplot as plt
 import numpy as np
 from numpy import e, sin, cos, tan, sqrt
+from cmath import nan
+from dichotomie import dichotomie
 
 
 
@@ -28,7 +29,7 @@ liste_zero = []
 def f(x):
     # Définition de la fonction ici
     try:
-        return (3*x-2)*e**x
+        return e**x
     except:
         return nan      #not a number
 
@@ -118,10 +119,7 @@ def detListeZero():
                 if removed:
                     liste_zero.append(a)
 
-
-
-# vérification de la liste de zéros avec la dichotomie 
-
+        
 
 
 # liste des tangentes 
@@ -131,6 +129,17 @@ newtonRaphson(f, a, 1)
 
 # détermine la liste des zeros selon Newton-Raphson
 detListeZero()
+
+# vérification de la liste de zéros avec la dichotomie 
+l = 0
+while l < len(liste_zero):
+    zero = liste_zero[l]
+    zero_theorique = dichotomie(f, zero+h, zero-h, 16, 0)
+    if zero_theorique == "Valeurs impossibles" or abs(zero_theorique-zero) > h:
+        liste_zero.remove(zero)
+    else:
+        l += 1
+
 print(liste_zero)
 
 
