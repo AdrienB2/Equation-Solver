@@ -130,4 +130,6 @@ canvas.draw()
 # affichage du graphe
 canvas.get_tk_widget().pack(fill=BOTH, expand=1)
 
+
+
 root.mainloop()
