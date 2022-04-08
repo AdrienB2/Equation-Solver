@@ -1,4 +1,3 @@
-from cProfile import label
 from tkinter import *
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
