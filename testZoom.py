@@ -1,65 +1,29 @@
-from numpy import arange, sin, pi, float, size
-
-import matplotlib
-matplotlib.use('WXAgg')
-from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg
-from matplotlib.figure import Figure
+import matplotlib.pyplot as plt
+import numpy as np
 
 
-fig = Figure((5, 4), 75)
-scroll_range = 400
+# Fixing random state for reproducibility
+np.random.seed(0)
 
-sizer = BoxSizer(VERTICAL)
-sizer.Add(canvas, -1, EXPAND)
+figsrc, axsrc = plt.subplots()
+figzoom, axzoom = plt.subplots()
+axsrc.set(xlim=(0, 1), ylim=(0, 1), autoscale_on=False,
+          title='Click to zoom')
+axzoom.set(xlim=(0.45, 0.55), ylim=(0.4, 0.6), autoscale_on=False,
+           title='Zoom window')
 
-init_data()
-init_plot()
+x, y, s, c = np.random.rand(4, 200)
+s *= 200
 
-canvas.Bind(EVT_SCROLLWIN, OnScrollEvt)
+axsrc.scatter(x, y, s, c)
+axzoom.scatter(x, y, s, c)
 
-def init_data():
-    global t, x, i_min, i_max, i_window, i_start, i_end
-    # Generate some data to plot:
-    dt = 0.01
-    t = arange(0,5,dt)
-    x = sin(2*pi*t)
 
-    # Extents of data sequence:
-    i_min = 0
-    i_max = len(t)
+def on_press(event):
+    x, y = event.xdata, event.ydata
+    axzoom.set_xlim(x - 0.1, x + 0.1)
+    axzoom.set_ylim(y - 0.1, y + 0.1)
+    figzoom.canvas.draw()
 
-    # Size of plot window:
-    i_window = 100
-
-    # Indices of data interval to be plotted:
-    i_start = 0
-    i_end = i_start + i_window
-
-def init_plot():
-    global x, i_min, i_max, i_window, i_start, i_end, plot_data
-    axes = fig.add_subplot(111)
-    plot_data = \
-              axes.plot(t[i_start:i_end],
-                             x[i_start:i_end])[0]
-
-def draw_plot():
-
-    # Update data in plot:
-    plot_data.set_xdata(t[i_start:i_end])
-    plot_data.set_ydata(x[i_start:i_end])
-
-    # Adjust plot limits:
-    axes.set_xlim((min(t[i_start:i_end]),
-                       max(t[i_start:i_end])))
-    axes.set_ylim((min(x[i_start:i_end]),
-                        max(x[i_start:i_end])))
-
-    # Redraw:
-    canvas.draw()
-
-    
-def OnScrollEvt(event):
-    # Update the indices of the plot:
-        i_start = i_min + event.GetPosition()
-        i_end = i_min + i_window + event.GetPosition()
-        draw_plot()
+figsrc.canvas.mpl_connect("scroll_event", on_press)
+plt.show()

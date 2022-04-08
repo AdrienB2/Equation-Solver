@@ -6,24 +6,24 @@ import numpy as np
 #liste des operations/fonctions/constantes
 operations=["+","-","*","/","^", "√","∛", "∜","sin","cos","tan", "π", "log","ln","exp", "abs"]
 
-function=""
+function = ""
 
 def solve():
-    value=functionInput.get()
+    value = functionInput.get()
 
 def update_function(stringToAdd):
     global function
-    function=functionInput.get()
+    function = functionInput.get()
     
     if stringToAdd in ["+", "-", "*", "/", "^"] and function[-1] in  ["+", "-", "*", "/", "^"]:
         return
 
     if stringToAdd == "DEL":
-        function=function[:-1]
+        function = function[:-1]
     else:
-        function+=stringToAdd
+        function += stringToAdd
     if stringToAdd in ["sin","cos","tan","log","ln","exp","abs","√","∛", "∜"]:
-        function+="("
+        function += "("
     functionInput.delete(0,END)
     functionInput.insert(0,function)
 

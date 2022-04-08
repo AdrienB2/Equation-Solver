@@ -1,7 +1,9 @@
 ### Import des librairies utiles : math, nummpy et matplotlib, tkinter
 import math as math
 import matplotlib.pyplot as plt
+from matplotlib.axis import Axis
 import numpy as np
+import time as time
 from numpy import e, sin, cos, tan, sqrt
 from cmath import nan
 from dichotomie import dichotomie
@@ -16,7 +18,7 @@ h = 0.000000000001
 borneInf = -5
 borneSup = 5
 # nombres de x vérifiés dans le graphe
-d = 100000
+d = 10000
 # liste des zeros
 liste_zero = []
 
@@ -29,7 +31,7 @@ liste_zero = []
 def f(x):
     # Définition de la fonction ici
     try:
-        return e**x
+        return eval("e**x")
     except:
         return nan      #not a number
 
@@ -144,36 +146,47 @@ print(liste_zero)
 
 
 def zoom(event):
+    print(event.xdata, event.ydata)
+    global borneInf, borneSup, scale, refresh
     if event.button == "up":
-        print(event.button, event.xdata, event.ydata)
-    # Adjust plot limits:
-    
+        print(1)
+    elif event.button == "down":
+        print(2)
 
+    fig.canvas.draw()
+    fig.canvas.flush_events()
 
 
 ### Graphe
 
-plt.style.use("dark_background") # fond noir car c'est plus stylax
-# crée n éléments (inversement proportionnel à d) qu'on va plot dans la fonction entre les bornes choisies
-x = np.linspace(borneInf, borneSup, d)
+def plot():
+    global f, tangente, L, d, borneInf, borneSup, fig, ax
+    plt.style.use("dark_background") # fond noir car c'est plus stylax
+    # crée n éléments (inversement proportionnel à d) qu'on va plot dans la fonction entre les bornes choisies
+    x = np.linspace(borneInf, borneSup, d)
 
-# création des axes
-fig = plt.figure()
-ax = fig.add_subplot(1, 1, 1)
-ax.spines['left'].set_position(('data', 0)) # la commande 'data' permet de positionner correctement les axes par rapport à la fonction
-ax.spines['bottom'].set_position(('data', 0))
-ax.spines['right'].set_color('none')
-ax.spines['top'].set_color('none')
-ax.xaxis.set_ticks_position('bottom')
-ax.yaxis.set_ticks_position('left')
+    # création des axes
+    fig = plt.figure()
+    ax = fig.add_subplot(1, 1, 1)
+    ax.spines['left'].set_position(('data', 0)) # la commande 'data' permet de positionner correctement les axes par rapport à la fonction
+    ax.spines['bottom'].set_position(('data', 0))
+    ax.spines['right'].set_color('none')
+    ax.spines['top'].set_color('none')
+    ax.xaxis.set_ticks_position('bottom')
+    ax.yaxis.set_ticks_position('left')
 
-# plot les fonctions
-plt.plot(x, f(x), 'y', label="f(x)")
-plt.legend(loc='upper left')
-fig.canvas.mpl_connect("scroll_event", zoom)
-# plot des tangentes
-for i in range(len(L)) :
-    plt.plot(x, tangente(f, x, L[i]), label="t_"+str(i))
+    # plot les fonctions
+    plt.ion
+    plt.plot(x, f(x), 'y', label="f(x)")
+    plt.legend(loc='upper left')
+    fig.canvas.mpl_connect("scroll_event", zoom)
+    # plot des tangentes
+    for i in range(len(L)) :
+        plt.plot(x, tangente(f, x, L[i]), label="t_"+str(i))
 
-# affiche la fenêtre des graphes
-plt.show()
+    # affiche la fenêtre des graphes
+    plt.show()
+
+scale = 0
+plot()
+    
