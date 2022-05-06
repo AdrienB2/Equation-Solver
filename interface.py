@@ -26,8 +26,14 @@ def update_function(stringToAdd):
         function += "("
     functionInput.delete(0,END)
     functionInput.insert(0,function)
+    update_graph()
 
-    
+def inputChange():
+    global function
+    function = functionInput.get()
+    update_graph()
+
+def update_graph():
     x = np.linspace(borneInf, borneSup, d)
     plt.cla()
     plt.plot(x, f(x), 'y', label="f(x)")
@@ -56,6 +62,8 @@ functionLabel = Label(functionInputFrame, text="f(x) = ")
 functionLabel.pack(side=LEFT)
 functionInput = Entry(functionInputFrame)
 functionInput.pack(side=RIGHT, fill=X)
+#detect when the user edit the function
+functionInput.bind("<KeyRelease>", lambda event: inputChange())
 
 
 calculer = Button(leftFrame, text="Calculer", command=solve)
