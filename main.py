@@ -31,7 +31,7 @@ liste_zero = []
 def f(x):
     # Définition de la fonction ici
     try:
-        return eval("e**x")
+        return eval("1/x")
     except:
         return nan      #not a number
 
@@ -58,6 +58,7 @@ def tangente(f, x, a):
 
 # fonction qui trouve les 0 avec la méthode de Newton-Raphson
 def newtonRaphson(f, a, mode):
+    
     # "a" est point autour duquel la tangente se fait
     anti_bug = 0        # possibilité d'osciller entre deux points
     try:
@@ -108,7 +109,8 @@ def detListeZero():
                         try:
                             if f(zero) >= f(a):
                                 liste_zero.remove(zero)
-                                if abs(a-round(a)) < h or abs(round(a)-a) < h:
+                                print(round(a))
+                                if abs(a-round(a)) < 2*h or abs(round(a)-a) < 2*h:
                                     liste_zero.append(round(a))
                                 else:
                                     liste_zero.append(a)
@@ -121,27 +123,30 @@ def detListeZero():
                 if removed:
                     liste_zero.append(a)
 
-        
-
 
 # liste des tangentes 
 a = 4
 L = [a]
 newtonRaphson(f, a, 1)
 
+
 # détermine la liste des zeros selon Newton-Raphson
 detListeZero()
+
+print(liste_zero)
 
 # vérification de la liste de zéros avec la dichotomie 
 l = 0
 while l < len(liste_zero):
     zero = liste_zero[l]
-    zero_theorique = dichotomie(f, zero+h, zero-h, 16, 0)
+    zero_theorique = dichotomie(f, zero+h, zero-h, 15, 0)
     if zero_theorique == "Valeurs impossibles" or abs(zero_theorique-zero) > h:
         liste_zero.remove(zero)
     else:
         l += 1
 
+
+liste_zero.sort()
 print(liste_zero)
 
 
@@ -184,9 +189,11 @@ def plot():
     for i in range(len(L)) :
         plt.plot(x, tangente(f, x, L[i]), label="t_"+str(i))
 
+    for zero_j in liste_zero: # affiche chaque zero trouvé 
+        plt.plot(zero_j, 0, 'o')
+
     # affiche la fenêtre des graphes
     plt.show()
 
 scale = 0
-plot()
-    
+plot()   

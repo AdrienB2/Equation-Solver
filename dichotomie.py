@@ -11,6 +11,7 @@ def dichotomie(f, a, b, prec, mode):
     if f(a) == "Erreur" or f(b) == "Erreur":
         return "Erreur des valeurs choisies (une des valeurs est impossible)"
 
+
     # Etape 2: on vérifie que le signe de f(a) et f(b) n'est pas le même
     if abs(f(a))/f(a) == abs(f(b))/f(b):
         # Si le mode choisi fait rien de spécial
