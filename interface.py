@@ -98,9 +98,17 @@ borneSup = 5
 # nombres de x vérifiés dans le graphe
 d = 100000
 function = "x"
+def sqrt(x):
+    return x**(1/2)
+def cbrt(x):
+    return x**(1/3)
+def root4(x):
+    return x**(1/4)
+
 def f(x):
     try:
-        return eval(function)
+        functionFormated = function.replace("^", "**").replace("√", "sqrt").replace("∛", "cbrt").replace("∜", "root4").replace("sin", "np.sin").replace("cos", "np.cos").replace("tan", "np.tan").replace("log", "np.log10").replace("ln", "np.log").replace("exp", "np.exp").replace("abs", "abs")
+        return eval(functionFormated)
     except:
         return 0
 
