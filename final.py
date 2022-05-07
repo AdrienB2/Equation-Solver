@@ -8,7 +8,6 @@ from matplotlib.axis import Axis
 from numpy import e, sin, cos, tan, sqrt
 from cmath import nan
 
-
 ####################
 #VARIABLES GLOBALES#
 ####################
@@ -201,6 +200,49 @@ def detListeZero(methode):
 #INTERFACE#
 ###########
 
+# fonction de zoomage sur le graphe
+def zoom_factory(ax):
+    def zoom_fun(event):
+        # on prends les limites actuelles de l'axe x et y
+        cur_xlim = ax.get_xlim()
+        cur_ylim = ax.get_ylim()
+
+        # on définit la longueur des intervalles dans lesquelles sont définies la fonction
+        xrange = (cur_xlim[1] - cur_xlim[0])/2
+        yrange = (cur_ylim[1] - cur_ylim[0])/2
+
+        # on prends la location du curseur, là on l'on veut zoomer
+        zoomToX = event.xdata  
+        zoomToY = event.ydata  
+
+        if event.button == "up":
+            # zoom in
+            scale_factor = 1/1.05
+        elif event.button == "down":
+            # zoom out
+            scale_factor = 1.05
+        
+        # définiton des nouvelles limites
+        x_inf = zoomToX - xrange*scale_factor
+        x_sup = zoomToX + xrange*scale_factor
+        y_inf = zoomToY - yrange*scale_factor
+        y_sup = zoomToY + yrange*scale_factor
+
+        # mise des nouvelles limites dans le grapheur
+        ax.set_xlim([x_inf, x_sup])
+        ax.set_ylim([y_inf, y_sup])
+
+        # redessine la fonction avec les nouvelles limites
+        plt.draw()
+
+    # on prend la figure dans laquelle on veut zoomer (la fenêtre du graphe)
+    fig = ax.get_figure() 
+    
+    # on connecte l'évenement "scroll" avec la fonction de zoomage
+    fig.canvas.mpl_connect('scroll_event', zoom_fun)
+
+    #return the function
+    return zoom_fun
 
 # fonciton exectutée lorsque l'utilisateur clique sur le bouton "calculer", pour déterminer les zeros de f
 def solve():
@@ -337,8 +379,7 @@ def f(x):
 plt.style.use("dark_background") # fond noir pour le graphe
 plt.ion() # on active l'affichage en temps réel
 # crée n éléments (inversement proportionnel à d) qu'on va plot dans la fonction entre les bornes choisies
-x = np.linspace(borneInf, borneSup, d)
-
+x = np.linspace(-1000, 1000, d)
 
 fig = plt.figure()
 ax = fig.add_subplot(1, 1, 1)
@@ -347,9 +388,15 @@ ax.spines['bottom'].set_position(('data', 0))
 ax.spines['right'].set_color('none')
 ax.spines['top'].set_color('none')
 
+# limitation du la vue du graphe au début
+plt.xlim(-10, 10)   # pour l'axe des x  
+plt.ylim(-10, 10)   # pour l'axe des y
+g = zoom_factory(ax)
+
 # plot les fonctions
 plt.plot(x, x, 'y', label="f(x)")
 plt.legend(loc='upper left')
+
 
 # creation du canvas pour le graphe
 canvas = FigureCanvasTkAgg(fig, master = graphFrame)  
