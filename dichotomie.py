@@ -16,16 +16,18 @@ def dichotomie(f, a, b, prec):
     if abs(f(a))/f(a) == abs(f(b))/f(b):
         # Etape 2.1: on ajoute -1 à a ou +1 à b pour trouver des signes de f(a) et f(b) différents 
         anti_bug = 0
+        # pour éviter des erreurs lors de fonctions ne changeant pas de signe
         while anti_bug < 10000:
             a -= 1
             b += 1
             try:
                 if f(a) == 0:
                     return a
-                    
+
                 elif f(b) == 0:
                     return b
 
+                # abs(f(c))/f(c) retourne le signe de c
                 elif abs(f(a))/f(a) != abs(f(b))/f(b):
                     break
 
