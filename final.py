@@ -12,19 +12,19 @@ from cmath import nan
 ####################
 #VARIABLES GLOBALES#
 ####################
+
 # variable contenant la fonction en string
 function = ""
-# liste des zeros
-liste_zero = []
 # borne entre lesquelles la fonction sera affichée
-borneInf = -5
-borneSup = 5
+borneInf = -100
+borneSup = 100
 
 
 
 #####################
 #CONSTANTES GLOBALES#
 #####################
+
 # nombres de x vérifiés dans le graphe
 d = 10000
 # le h va déterminer l'ordre de précision de la dérivée
@@ -32,6 +32,8 @@ d = 10000
 h = 0.000000000001
 # liste des operations/fonctions/constantes
 operations=["+","-","*","/","^", "√","∛", "∜","sin","cos","tan", "π", "log","ln","exp", "abs"]
+
+
 
 ###########
 #FONCTIONS#
@@ -56,6 +58,7 @@ def derivative(f, x):
     f2 = f(x + h)
     fDerivee = (f2 - f1)/h  
     return fDerivee
+
 
 # fonction qui trouve les 0 avec la méthode de Newton-Raphson
 def newtonRaphson(f, a):
@@ -91,9 +94,10 @@ def newtonRaphson(f, a):
         else:
             return "Erreur"
 
-# méthode de dichotomie, la fonction retourne un zero de la fonction
-def dichotomie(f, a, b, prec):
-    #a < b par convention et prec représente la précision de la solution en décimales
+
+# méthode de dichotomie, la fonction retourne un zero de la fonction (à améliorer / commentaires)
+def dichotomie(f, a, b):
+    # a < b par convention
 
     # Etape 1: On vérifie si f(a) et f(b) ne sont pas des zéros, ou qu'ils sont impossibles
     if f(a) == 0:
@@ -102,7 +106,7 @@ def dichotomie(f, a, b, prec):
         return b
 
     if f(a) == "Erreur" or f(b) == "Erreur":
-        return "Erreur des valeurs choisies (une des valeurs est impossible)"
+        return "Erreur"
 
 
     # Etape 2: on vérifie que le signe de f(a) et f(b) n'est pas le même
@@ -132,7 +136,7 @@ def dichotomie(f, a, b, prec):
 
     # Etape 3: méthode de dichotomie, si abs(f(x)) < 10^(-précision) alors on arrête la boucle et on retourne x
     try:
-        while abs(f((a+b)/2))>(10**(-prec)):
+        while abs(f((a+b)/2))>h:
             if f((a+b)/2)<0:
                 if f(a) < 0:
                     a = (a+b)/2
@@ -145,47 +149,82 @@ def dichotomie(f, a, b, prec):
                     b = (a+b)/2
         return (a+b)/2
     except:
-        return "Erreur, la fonction est pas continue"
+        return "Erreur"
 
-# fonction qui détermine les zeros de f avec la méthode Newton-Raphson (a refaire)
-def detListeZero():
-    global liste_zero
-    for x in range(-20,21):
-        x = x/2
-        a = newtonRaphson(f, x, 0)
-        if a == "Erreur":
-            return
 
-        if len(liste_zero) == 0:
-            liste_zero.append(a)
+# fonction qui détermine les zeros de f avec la méthode Newton-Raphson (à revoir)
+def detListeZero(methode):
+    # liste qui stocke les zeros
+    liste_zero = []
+    # boucle sur x pour déterminer beaucoup de zéros avec les deux techniques
+    for x in range(borneInf, borneSup+1):
+        # si la méthode est Newton-Raphson
+        if methode == "Newton-Raphson":
+            # détermination d'un zero à partir de x
+            a = newtonRaphson(f, x)
+        # si la méthode est la dichotomie
+        elif methode == "Dichotomie":
+            # détermination d'un zero à partir de x
+            a = dichotomie(f, x, x+1)
         else:
-            removed = True
-            for zero in liste_zero:
-                if abs(zero-a) < 2*h:
-                    try:
-                        if f(zero) >= f(a):
-                            liste_zero.remove(zero)
-                            print(round(a))
-                            if abs(a-round(a)) < 2*h or abs(round(a)-a) < 2*h:
-                                liste_zero.append(round(a))
-                            else:
-                                liste_zero.append(a)
-                            removed = False
-                            break
-                        removed = False
-                    except:
-                        removed = False
-                        break
-            if removed:
+            return []
+        # si a n'est pas une erreur, on peut continuer
+        if a != "Erreur":
+            # si il n'y a pas encore de 0, on ajoute le zéro à la liste
+            if len(liste_zero) == 0:
                 liste_zero.append(a)
+            # si il y a déjà un zéro, il faut s'assurer que deux zéros ne sont pas proches
+            else:
+                for zero in liste_zero:
+                    # si un zéro et le nouveau zéro sont très proches, on prend le résultat le plus petit et on l'ajoute dans la liste des zéros
+                    print(abs(zero-a) < 0.0001, a)
+
+                    if abs(zero-a) < 0.0001:
+                        # si le nouveau zéro a une valeur dans f plus petite, on enlève le zéro proche et on ajoute le nouveau zéro
+                        if f(zero) > f(a):
+                            liste_zero.remove(zero)
+                            liste_zero.append(a)
+                            break   # coupe la boucle puisqu'on a ajouté le zéro voulu
+                        # si l'ancien zéro a une valeur dans f plus petite, on coupe la boucle, pusique le nouveau zéro est "moins bon" que l'ancien
+                        else:
+                            break
+                # si le nouveau zéro est proche d'aucun des zéros, on l'ajoute à la liste
+                liste_zero.append(a)
+
+    # retourne à la toute fin la liste des zéros 
+    return liste_zero
+
+
+
 
 ###########
 #INTERFACE#
 ###########
 
+
 # fonciton exectutée lorsque l'utilisateur clique sur le bouton "calculer", pour déterminer les zeros de f
 def solve():
-    value = functionInput.get()
+    # prend la valeur dans la zone pour choisir sa méthode
+    methode = methodeStr.get()
+    print(methode)
+    # calcule la liste des zeros selon la méthode choisie
+    liste_zero = detListeZero(methode)
+
+    print(liste_zero)
+    strZeros = ""
+    for y in range(len(liste_zero)): # prend 1 à 1 chaque zéro trouvé 
+        # affiche le zéro sur le graphique
+        plt.plot(liste_zero[y], 0, 'o')
+        # orthographe française ; le 1er zéro doit être marqué comme "1er", pas "1eme"
+        if y == 0:
+            strZeros += f"\n Le 1er zéro de la fonction est en x = {liste_zero[y]}."
+        else:
+            strZeros += f"\n Le {y+1}ème zéro de la fonction est en x = {liste_zero[y]}."
+
+    # zone de texte dans la zone de gauche, qui montre les zéros
+    zeroLabel = Label(leftFrame, text=strZeros)
+    # mise de la zone de texte sur la fenêtre
+    zeroLabel.pack()
 
 # fonction exectutée lorsque l'utilisateur clique sur un bouton qui modifie la fonction, pour actualiser la fonction dans la variable et l'afficher
 def update_function(stringToAdd):
@@ -232,9 +271,9 @@ root.rowconfigure(0, weight=1) # permet à la ligne du haut de prendre toute la 
 leftFrame = Frame(root)
 leftFrame.grid(row=0, column=0)
 
-methode = StringVar()
-methode.set("méthode de résolution")
-methodeMenu = OptionMenu(leftFrame, methode, "Newton-Raphson", "Dichotomie")
+methodeStr = StringVar()
+methodeStr.set("méthode de résolution")
+methodeMenu = OptionMenu(leftFrame, methodeStr, "Newton-Raphson", "Dichotomie")
 methodeMenu.pack(side=TOP, fill=X)
 
 functionInputFrame = Frame(leftFrame)
