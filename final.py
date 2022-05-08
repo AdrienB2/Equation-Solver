@@ -104,52 +104,78 @@ def dichotomie(f, a, b):
     if f(b) == 0:
         return b
 
-    if f(a) == "Erreur" or f(b) == "Erreur":
-        return "Erreur"
+    if f(a) == nan or f(b) == nan:
+        return nan
 
 
     # Etape 2: on vérifie que le signe de f(a) et f(b) n'est pas le même
     if abs(f(a))/f(a) == abs(f(b))/f(b):
         # Etape 2.1: on ajoute -1 à a ou +1 à b pour trouver des signes de f(a) et f(b) différents 
-        anti_bug = 0
+        anti_bug = 0    # variable anti_bug évite les cas où la fonction ne change pas de signe
         while anti_bug < 10000:
-            a -= 1
+            # on cherche un nombre a et un nombre b tels que signe(f(a)) n'est pas égal à signe(f(b)) 
+            a -= 1   
             b += 1
+            # on essaye de regarder si signe(f(a)) n'est pas égal à signe(f(b))
+            # try est nécessaire pour le cas où f(a) ou f(b) est nan
             try:
+                # on essaye de regarder si f(a) ou f(b) sont 0 (pour éviter les divisions par 0)
                 if f(a) == 0:
                     return a
-                    
+                
                 elif f(b) == 0:
                     return b
-
+                
+                # si signe(f(a)) n'est pas signe(f(b)), on passe à l'étape suivante
                 elif abs(f(a))/f(a) != abs(f(b))/f(b):
                     break
-
+            
+            # si f(a) ou f(b) est nan, on continue de chercher
             except:
-                a -= 1
-                b += 1
+                pass
 
+            # incrémentation du nombre d'essais par 1
             anti_bug += 1
+    
+        # si la fonction ne change pas de signe, il n'y a pas de zéro
         if anti_bug == 10000:
-            print("Erreur des valeurs choisies (RunTimeError)")
+            return nan 
 
     # Etape 3: méthode de dichotomie, si abs(f(x)) < 10^(-précision) alors on arrête la boucle et on retourne x
-    try:
-        while abs(f((a+b)/2))>h:
-            if f((a+b)/2)<0:
-                if f(a) < 0:
-                    a = (a+b)/2
+    anti_bug = 0    # variable anti_bug évite les cas où la fonction n'est pas continue 
+    while anti_bug < 100:
+        # try est nécessaire pour éviter le cas où f((a+b)/2) est nan
+        try:
+            # tant que f((a+b)/2) n'est un zéro, on continue de chercher
+            while abs(f((a+b)/2))>h:
+                # si f((a+b)/2) est inférieur à zéro, ...
+                if f((a+b)/2)<0:
+                    # ... et f(a) inférieur à zéro, alors a doit se rapprocher plus de b
+                    if f(a) < 0:
+                        a = (a+b)/2
+                    # ... et f(a) supérieur à zéro, alors b doit se rapprocher plus de a
+                    else:
+                        b = (a+b)/2
+                # si f((a+b)/2) est supérieur à zéro, ...
                 else:
-                    b = (a+b)/2
-            else:
-                if f(a) > 0:
-                    a = (a+b)/2
-                else:
-                    b = (a+b)/2
-        return (a+b)/2
-    except:
-        return "Erreur"
+                    # ... et f(a) supérieur à zéro, alors a doit se rapprocher plus de b
+                    if f(a) > 0:
+                        a = (a+b)/2
+                    # ... et f(a) inférieur à zéro, alors b doit se rapprocher plus de a
+                    else:
+                        b = (a+b)/2
+            # si on arrive ici, ça veut dire que f((a+b)/2) est un zéro, donc on le retourne
+            return (a+b)/2
 
+        # si f((a+b)/2) est un nan
+        except:
+            # on incrémente a un tout petit peu, pour éviter une erreur à la prochaine tentative
+            a += h
+            # incrémentation du nombre d'essais loupés par 1
+            anti_bug += 1
+
+    # si l'on arrive ici, alors la fonction n'est pas continue => pas de zéros
+    return nan
 
 # fonction qui détermine les zeros de f avec la méthode Newton-Raphson (à revoir)
 def detListeZero(methode):
@@ -163,7 +189,7 @@ def detListeZero(methode):
             a = newtonRaphson(f, x)
         # si la méthode est la dichotomie
         elif methode == "Dichotomie":
-            # détermination d'un zero à partir de x
+            # détermination d'un zero entre x et x+1
             a = dichotomie(f, x, x+1)
         else:
             return []
@@ -200,9 +226,10 @@ def detListeZero(methode):
 #INTERFACE#
 ###########
 
-# fonction de zoomage sur le graphe
-def zoom_factory(ax):
-    def zoom_fun(event):
+# fonction pour activer le zoomage sur le graphe
+def activer_zoom(ax):
+    # fonction qui zoome une fois sur le graphe
+    def zoom(event):
         # on prends les limites actuelles de l'axe x et y
         cur_xlim = ax.get_xlim()
         cur_ylim = ax.get_ylim()
@@ -239,10 +266,10 @@ def zoom_factory(ax):
     fig = ax.get_figure() 
     
     # on connecte l'évenement "scroll" avec la fonction de zoomage
-    fig.canvas.mpl_connect('scroll_event', zoom_fun)
+    fig.canvas.mpl_connect('scroll_event', zoom)
 
-    #return the function
-    return zoom_fun
+    # retourne la fonction
+    return zoom
 
 # fonciton exectutée lorsque l'utilisateur clique sur le bouton "calculer", pour déterminer les zeros de f
 def solve():
@@ -391,7 +418,9 @@ ax.spines['top'].set_color('none')
 # limitation du la vue du graphe au début
 plt.xlim(-10, 10)   # pour l'axe des x  
 plt.ylim(-10, 10)   # pour l'axe des y
-g = zoom_factory(ax)
+
+# on appelle la fonction de zoom pour l'activer
+g = activer_zoom(ax)
 
 # plot les fonctions
 plt.plot(x, x, 'y', label="f(x)")
