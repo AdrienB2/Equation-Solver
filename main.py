@@ -2,8 +2,8 @@
 import math as math
 import matplotlib.pyplot as plt
 from matplotlib.axis import Axis
+# numpy parce que c'est mieux que math
 import numpy as np
-import time as time
 from numpy import e, sin, cos, tan, sqrt
 from cmath import nan
 from dichotomie import dichotomie
@@ -58,7 +58,6 @@ def tangente(f, x, a):
 
 # fonction qui trouve les 0 avec la méthode de Newton-Raphson
 def newtonRaphson(f, a, mode):
-    
     # "a" est point autour duquel la tangente se fait
     anti_bug = 0        # possibilité d'osciller entre deux points
     try:
