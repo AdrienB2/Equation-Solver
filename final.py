@@ -8,6 +8,8 @@ from matplotlib.axis import Axis
 from numpy import e, sin, cos, tan, sqrt
 from cmath import nan
 
+
+
 ####################
 #VARIABLES GLOBALES#
 ####################
@@ -42,12 +44,12 @@ operations=["+","-","*","/","^", "√","∛", "∜","sin","cos","tan", "π", "lo
 
 # la fonction f dont on cherche les zéros
 def f(x):
-    # global permet d'avoir partout la même référence à la variable "function" 
-    global function
-    # Essaie de calculer f(x) (en fonction du x)
+    # essaye d'évaluer la fonction en x
     try:
-        return eval(function)
-    # Si il n'y arrive pas (par exemple lors de division par 0), le code retourne un "Not a Number", ce qui permet au programme de continuer sans erreurs
+        # on reformate la fonction avec des opérations connues par python
+        functionFormated = function.replace("^", "**").replace("√", "root2").replace("∛", "cbrt").replace("∜", "root4").replace("sin", "np.sin").replace("cos", "np.cos").replace("tan", "np.tan").replace("log", "np.log10").replace("ln", "np.log").replace("exp", "np.exp").replace("abs", "abs").replace("π", "np.pi")
+        return eval(functionFormated)
+    # si elle y arrive pas, retourne un nan ("Not A Number")
     except:
         return nan
 
@@ -220,9 +222,9 @@ def detListeZero(methode):
 
 
 
-###########
-#INTERFACE#
-###########
+##########################
+#FONCTIONS DE L'INTERFACE#
+##########################
 
 # fonction pour activer le zoomage sur le graphe
 def activer_zoom(ax):
@@ -271,6 +273,7 @@ def activer_zoom(ax):
 
 # fonciton exectutée lorsque l'utilisateur clique sur le bouton "calculer", pour déterminer les zeros de f
 def solve():
+    # global permet d'avoir partout la même référence à la variable "strZeros" et "zeroLabel" 
     global strZeros, zeroLabel
     # prend la valeur dans la zone pour choisir sa méthode
     methode = methodeStr.get()
@@ -294,103 +297,135 @@ def update_function(stringToAdd):
     # global permet d'avoir partout la même référence à la variable "function" 
     global function
     
-    if stringToAdd in ["+", "-", "*", "/", "^"] and function[-1] in  ["+", "-", "*", "/", "^"]:
+    # si il y a deux opérations conséqutives, la fonction n'est pas valable
+    if stringToAdd in ["+", "-", "*", "/", "^"]:
         return
-
+    # si il y a une opération à la fin de la fonction, la fonction n'est pas valable
+    elif function[-1] in  ["+", "-", "*", "/", "^"]:
+        return
+    
+    # si le bouton appuyé est "delete", on enlève le dernier élément
     if stringToAdd == "DEL":
         function = function[:-1]
+    # sinon, on ajoute le terme présent sur le bouton choisi
     else:
         function += stringToAdd
+    # si le terme est une fonction, on est obligé de mettre les parenthèses
     if stringToAdd in ["sin","cos","tan","log","ln","exp","abs","√","∛", "∜"]:
         function += "("
+    
+    # actualisation du champ de texte dans lequel il y a la fonction affichée
     functionInput.delete(0,END)
     functionInput.insert(0,function)
+    # si la fonction est réussite, on actualise le graphe
     update_graph()
 
-# fonction appelée losque l'utilisateur modifie le champs de texte de la fonciton
+# fonction appelée losque l'utilisateur modifie le champ de texte de la fonciton
 def inputChange():
+    # global permet d'avoir partout la même référence à la variable "function" 
     global function
+    # on récupère la fonction entrée dans le champ de texte
     function = functionInput.get()
+    # on actualise le graphe
     update_graph()
 
-# fonction qui actualise l'afficahge du graphique
+# fonction qui actualise l'affichage du graphique
 def update_graph():
+    # redéfinition de l'ensemble des x qui est plot
     x = np.linspace(borneInf, borneSup, d)
+    # clear du plot
     plt.cla()
+    # redessinage du graphe
     plt.plot(x, f(x), 'y', label="f(x)")
+    # choix de la location du plot
     plt.legend(loc='upper left')
-    ax.spines['left'].set_position(('data', 0)) # la commande 'data' permet de positionner correctement les axes par rapport à la fonction
+    # la commande 'data' permet de positionner correctement les axes par rapport à la fonction, c.à.d en (0,0)
+    ax.spines['left'].set_position(('data', 0)) 
     ax.spines['bottom'].set_position(('data', 0))
     # limitation du la vue du graphe au début
     plt.xlim(-10, 10)   # pour l'axe des x  
     plt.ylim(-10, 10)   # pour l'axe des y
+    # dessinage du plot dans la fenêtre tkinter
     canvas.draw()
 
-# Afficahger de l'interface
+
+
+###########
+#INTERFACE#
+###########
+
 root = Tk() # création de la fenêtre
 root.title("Equation Solver") # titre de la fenêtre
-root.state('zoomed') # fenêtre maximisée
+root.state('zoomed') # fenêtre maximisée (pas en plein écran)
 
 root.columnconfigure(1, weight=1) # permet à la colone contenant le grphique de prendre toute la largeur de la fenêtre
 root.rowconfigure(0, weight=1) # permet à la ligne du haut de prendre toute la hauteur de la fenêtre
 
-leftFrame = Frame(root)
-leftFrame.grid(row=0, column=0)
+leftFrame = Frame(root) # création d'une zone l'où l'on pourra mettre d'autres zones (comme du texte p.ex)
+leftFrame.grid(row=0, column=0) # mise de la zone tout en haut à gauche ((0,0) est tout en haut à gauche du tkinter)
 
-methodeStr = StringVar()
-methodeStr.set("méthode de résolution")
-methodeMenu = OptionMenu(leftFrame, methodeStr, "Newton-Raphson", "Dichotomie")
-methodeMenu.pack(side=TOP, fill=X)
+# création d'une zone de texte l'où écrit : "Méthode de résolution"
+methodeStr = StringVar() 
+methodeStr.set("Méthode de résolution")
+methodeMenu = OptionMenu(leftFrame, methodeStr, "Newton-Raphson", "Dichotomie") # création d'une zone choix multiple (menu) l'où écrit il y a : "Newton-Raphson" et "Dichotomie"
+methodeMenu.pack(side=TOP, fill=X)  # mise du menu dans la zone "leftFrame", le plus en haut possible 
 
-functionInputFrame = Frame(leftFrame)
-functionInputFrame.pack(fill=X, side=TOP)
+functionInputFrame = Frame(leftFrame)    # création d'une zone l'où mettera l'input de la fonction
+functionInputFrame.pack(fill=X, side=TOP)   # mise de la zone dans la zone "leftFrame", le plus en haut possible 
 
-functionLabel = Label(functionInputFrame, text="f(x) = ")
+# création d'une zone de texte l'où écrit : "f(x) = " à gauche 
+functionLabel = Label(functionInputFrame, text="f(x) = ")   
 functionLabel.pack(side=LEFT)
+# création d'une zone où l'on peut écrire la fonction, à droite 
 functionInput = Entry(functionInputFrame)
 functionInput.pack(side=RIGHT, fill=X)
+# Connection entre l'événement "Relachement de touche" et la fonction inputChange()
 functionInput.bind("<KeyRelease>", lambda event: inputChange())
 
+calculer = Button(leftFrame, text="Calculer", command=solve)    # création d'un bouton qui va appeler la fonction solve()
+calculer.pack(side=TOP, fill=X)  # mise du bouton dans la zone "leftFrame", le plus en haut possible 
 
-calculer = Button(leftFrame, text="Calculer", command=solve)
-calculer.pack(side=TOP, fill=X)
+zeroLabel = Label(leftFrame, text=strZeros) # zone de texte dans la zone de gauche, qui montre les zéros
+zeroLabel.pack()    # mise de la zone de texte sur la zone de gauche
 
-graphFrame = Frame(root)
-graphFrame.grid(row=0, column=1, sticky=N+S+E+W)
+graphFrame = Frame(root)    # création d'une zone l'où l'on mettera le graphique
+graphFrame.grid(row=0, column=1, sticky=N+S+E+W)    # mise de la zone tout en haut à droite
 
 
-bottomFrame = Frame(root)
-bottomFrame.grid(row=1, column=0, columnspan=2)
+bottomFrame = Frame(root)    # création d'une zone l'où l'on mettera les boutons comme sur la calculette
+bottomFrame.grid(row=1, column=0, columnspan=2) # mise de la zone tout en bas au milieu (avec columnspan)
 
-# zone de texte dans la zone de gauche, qui montre les zéros
-zeroLabel = Label(leftFrame, text=strZeros)
-# mise de la zone de texte sur la fenêtre
-zeroLabel.pack()
 
-#Boutons pour les chiffres de 0 à 9
-#affichage des boutons de 1 à 9
+
+# boutons pour les chiffres de 0 à 9
+
+# affichage des boutons de 1 à 9, qui appelent toutes la fonction update_fonction(), avec paramètre leur chiffre respectif
 for i in range(3):
     for j in range(3):
+        # on boucle doublement pour avoir 3 boutons par ligne
         Button(bottomFrame, text=str(i*3+j+1), command=lambda x=str(i*3+j+1): update_function(x), font=("Helvetica",20)).grid(row=i, column=j)
-#affichage des boutons de 0
+# affichage des boutons de 0
 Button(bottomFrame, text="0", command=lambda: update_function("0"), font=("Helvetica",20)).grid(row=3, column=0, columnspan=2, sticky='ew')
-#bouton pour la virgule
-btnDot = Button(bottomFrame, text=".", command=lambda: update_function("."), font=("Helvetica",20))
-btnDot.grid(row=3, column=2, sticky='ew')
+# bouton pour la virgule
+Button(bottomFrame, text=".", command=lambda: update_function("."), font=("Helvetica",20)).grid(row=3, column=2, sticky='ew')
 
-#juste pour avoir une marge entre les chiffre et les opérations
+# juste pour avoir une marge entre les chiffre et les opérations
 Label(bottomFrame, text=" ").grid(row=0, column=3, sticky='ew', padx=5)
 
-#création des boutons pour les opérations
+# création des boutons pour les opérations
 for i in range(4):
     for j in range(4):
+        # on boucle doublement pour avoir 4 boutons par ligne
         Button(bottomFrame, text=operations[i+4*j], command=lambda x=operations[i+4*j]: update_function(x), font=("Helvetica",20)).grid(row=i, column=j + 4, sticky='ew')
+
+# creation du bouton pour delete
 Button(bottomFrame, text="←", command=lambda: update_function("DEL"), font=("Helvetica",20)).grid(row=3, column=8, sticky='ew')
-#creation des boutons x, (,)
+# creation des boutons pour x, (, )
 Button(bottomFrame, text="x", command=lambda: update_function("x"), font=("Helvetica",20)).grid(row=0, column=8, sticky='ew')
 Button(bottomFrame, text="(", command=lambda: update_function("("), font=("Helvetica",20)).grid(row=1, column=8, sticky='ew')
 Button(bottomFrame, text=")", command=lambda: update_function(")"), font=("Helvetica",20)).grid(row=2, column=8, sticky='ew')
 
+# on définit des fonctions de racine pour que python les comprenne
 def root2(x):
     return x**(1/2)
 def cbrt(x):
@@ -398,21 +433,18 @@ def cbrt(x):
 def root4(x):
     return x**(1/4)
 
-def f(x):
-    try:
-        functionFormated = function.replace("^", "**").replace("√", "root2").replace("∛", "cbrt").replace("∜", "root4").replace("sin", "np.sin").replace("cos", "np.cos").replace("tan", "np.tan").replace("log", "np.log10").replace("ln", "np.log").replace("exp", "np.exp").replace("abs", "abs").replace("π", "np.pi")
-        return eval(functionFormated)
-    except:
-        return nan
 
 plt.style.use("dark_background") # fond noir pour le graphe
 plt.ion() # on active l'affichage en temps réel
 # crée n éléments (inversement proportionnel à d) qu'on va plot dans la fonction entre les bornes choisies
 x = np.linspace(-1000, 1000, d)
 
+# création de la figure du graphe
 fig = plt.figure()
+# création de 2 axes dans la figure
 ax = fig.add_subplot(1, 1, 1)
-ax.spines['left'].set_position(('data', 0)) # la commande 'data' permet de positionner correctement les axes par rapport à la fonction
+# la commande 'data' permet de positionner correctement les axes par rapport à la fonction (ici en (0,0))
+ax.spines['left'].set_position(('data', 0)) 
 ax.spines['bottom'].set_position(('data', 0))
 ax.spines['right'].set_color('none')
 ax.spines['top'].set_color('none')
