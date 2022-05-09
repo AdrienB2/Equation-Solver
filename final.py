@@ -313,6 +313,7 @@ plt.plot(x, x, 'y', label="f(x)")
 plt.legend(loc='upper left')
 
 # creation du canvas pour le graphe
+
 canvas = FigureCanvasTkAgg(fig, master = graphFrame)  
 canvas.draw()
 
