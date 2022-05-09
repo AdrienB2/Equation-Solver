@@ -14,6 +14,8 @@ from cmath import nan
 
 # variable contenant la fonction en string
 function = ""
+# variable contenant la position des zéros
+strZeros = ""
 # borne entre lesquelles la fonction sera affichée
 borneInf = -100
 borneSup = 100
@@ -49,7 +51,6 @@ def f(x):
     except:
         return nan
 
-
 # fonction qui calcule la dérivée de f en x
 def derivative(f, x):
     # utilisation de la définition de la dérivée avec la limite ; f'(a) = lim h->0 ((f(a + h) - f(a))/h)
@@ -58,7 +59,6 @@ def derivative(f, x):
     fDerivee = (f2 - f1)/h  
     return fDerivee
 
-
 # fonction qui trouve les 0 avec la méthode de Newton-Raphson
 def newtonRaphson(f, a):
     
@@ -66,7 +66,7 @@ def newtonRaphson(f, a):
     anti_bug = 0        # possibilité d'osciller entre deux points
     try:
         # tant que la valeur f(a) n'est pas proche de 0 (ou que anti-bug est trop élevé)
-        while abs(f(a)) > h/1000 and anti_bug < 10000:
+        while abs(f(a)) > h/1000 and anti_bug < 1000:
             # si la dérivée est nulle, retourne une erreur
             if abs(derivative(f, a)) == 0:
                 return "Erreur"
@@ -77,7 +77,7 @@ def newtonRaphson(f, a):
                 # incrémentation de l'anti-bug
                 anti_bug += 1
         # si il n'y a pas d'oscillation
-        if anti_bug < 10000 and abs(f(a)) < h/1000:
+        if anti_bug < 1000 and abs(f(a)) < h/1000:
             # si on arrive ici, alors ça veut dire que f(a) est nulle, donc c'est un zero
             return a
         # si il y a une oscillation, retourne une erreur
@@ -105,14 +105,14 @@ def dichotomie(f, a, b):
         return b
 
     if f(a) == nan or f(b) == nan:
-        return nan
+        return "Erreur"
 
 
     # Etape 2: on vérifie que le signe de f(a) et f(b) n'est pas le même
     if abs(f(a))/f(a) == abs(f(b))/f(b):
         # Etape 2.1: on ajoute -1 à a ou +1 à b pour trouver des signes de f(a) et f(b) différents 
         anti_bug = 0    # variable anti_bug évite les cas où la fonction ne change pas de signe
-        while anti_bug < 10000:
+        while anti_bug < 1000:
             # on cherche un nombre a et un nombre b tels que signe(f(a)) n'est pas égal à signe(f(b)) 
             a -= 1   
             b += 1
@@ -138,8 +138,8 @@ def dichotomie(f, a, b):
             anti_bug += 1
     
         # si la fonction ne change pas de signe, il n'y a pas de zéro
-        if anti_bug == 10000:
-            return nan 
+        if anti_bug == 1000:
+            return "Erreur"
 
     # Etape 3: méthode de dichotomie, si abs(f(x)) < 10^(-précision) alors on arrête la boucle et on retourne x
     anti_bug = 0    # variable anti_bug évite les cas où la fonction n'est pas continue 
@@ -175,7 +175,7 @@ def dichotomie(f, a, b):
             anti_bug += 1
 
     # si l'on arrive ici, alors la fonction n'est pas continue => pas de zéros
-    return nan
+    return "Erreur"
 
 # fonction qui détermine les zeros de f avec la méthode Newton-Raphson (à revoir)
 def detListeZero(methode):
@@ -195,30 +195,28 @@ def detListeZero(methode):
             return []
         # si a n'est pas une erreur, on peut continuer
         if a != "Erreur":
-            # si il n'y a pas encore de 0, on ajoute le zéro à la liste
-            if len(liste_zero) == 0:
-                liste_zero.append(a)
-            # si il y a déjà un zéro, il faut s'assurer que deux zéros ne sont pas proches
-            else:
-                for zero in liste_zero:
-                    # si un zéro et le nouveau zéro sont très proches, on prend le résultat le plus petit et on l'ajoute dans la liste des zéros
-                    print(abs(zero-a) < 0.0001, a)
-
-                    if abs(zero-a) < 0.0001:
-                        # si le nouveau zéro a une valeur dans f plus petite, on enlève le zéro proche et on ajoute le nouveau zéro
-                        if f(zero) > f(a):
-                            liste_zero.remove(zero)
+            ##### la partie ci-dessous est très utile pour corriger les fonctions qui tendent vers 0, mais elle cause des bugs dans le fonctions qui croisent 0 mais ne changent pas de signe. À garder ????
+            # évite le cas de fonctions qui tendent vers l'infini (comme e^x)
+            if f(round(a, 8)) != 0 and f(a) != 0:
+                # si il n'y a pas d'erreurs de f dans le voisinage de x
+                if f(a+h) != nan and f(a-h) != nan:
+                    # si le signe de f(a+h) n'est pas égal à celui de f(a-h), alors il y a un zéro en a
+                    if abs(f(a+h))/f(a+h) != abs(f(a-h))/f(a-h):
+                        # arrondi du zéro trouvé à 10^(-8)
+                        a = round(a, 8)
+                        # il faut s'assurer que le zéro trouvé n'est pas déjà répertorié
+                        if not a in liste_zero:
                             liste_zero.append(a)
-                            break   # coupe la boucle puisqu'on a ajouté le zéro voulu
-                        # si l'ancien zéro a une valeur dans f plus petite, on coupe la boucle, pusique le nouveau zéro est "moins bon" que l'ancien
-                        else:
-                            break
-                # si le nouveau zéro est proche d'aucun des zéros, on l'ajoute à la liste
-                liste_zero.append(a)
+            ######
+            else:
+                # arrondi du zéro trouvé à 10^(-8)
+                a = round(a, 8)
+                # il faut s'assurer que le zéro trouvé n'est pas déjà répertorié
+                if not a in liste_zero:
+                    liste_zero.append(a)
 
     # retourne à la toute fin la liste des zéros 
     return liste_zero
-
 
 
 
@@ -273,27 +271,23 @@ def activer_zoom(ax):
 
 # fonciton exectutée lorsque l'utilisateur clique sur le bouton "calculer", pour déterminer les zeros de f
 def solve():
+    global strZeros, zeroLabel
     # prend la valeur dans la zone pour choisir sa méthode
     methode = methodeStr.get()
-    print(methode)
     # calcule la liste des zeros selon la méthode choisie
     liste_zero = detListeZero(methode)
-
-    print(liste_zero)
     strZeros = ""
     for y in range(len(liste_zero)): # prend 1 à 1 chaque zéro trouvé 
         # affiche le zéro sur le graphique
         plt.plot(liste_zero[y], 0, 'o')
         # orthographe française ; le 1er zéro doit être marqué comme "1er", pas "1eme"
         if y == 0:
-            strZeros += f"\n Le 1er zéro de la fonction est en x = {liste_zero[y]}."
+            strZeros += f"\n Le 1er zéro de la fonction est en x = {liste_zero[y]}"
         else:
-            strZeros += f"\n Le {y+1}ème zéro de la fonction est en x = {liste_zero[y]}."
+            strZeros += f"\n Le {y+1}ème zéro de la fonction est en x = {liste_zero[y]}"
 
-    # zone de texte dans la zone de gauche, qui montre les zéros
-    zeroLabel = Label(leftFrame, text=strZeros)
-    # mise de la zone de texte sur la fenêtre
-    zeroLabel.pack()
+    # update du texte dans zone de texte qui montre les zéros
+    zeroLabel.config(text=strZeros)
 
 # fonction exectutée lorsque l'utilisateur clique sur un bouton qui modifie la fonction, pour actualiser la fonction dans la variable et l'afficher
 def update_function(stringToAdd):
@@ -327,6 +321,9 @@ def update_graph():
     plt.legend(loc='upper left')
     ax.spines['left'].set_position(('data', 0)) # la commande 'data' permet de positionner correctement les axes par rapport à la fonction
     ax.spines['bottom'].set_position(('data', 0))
+    # limitation du la vue du graphe au début
+    plt.xlim(-10, 10)   # pour l'axe des x  
+    plt.ylim(-10, 10)   # pour l'axe des y
     canvas.draw()
 
 # Afficahger de l'interface
@@ -365,6 +362,11 @@ graphFrame.grid(row=0, column=1, sticky=N+S+E+W)
 bottomFrame = Frame(root)
 bottomFrame.grid(row=1, column=0, columnspan=2)
 
+# zone de texte dans la zone de gauche, qui montre les zéros
+zeroLabel = Label(leftFrame, text=strZeros)
+# mise de la zone de texte sur la fenêtre
+zeroLabel.pack()
+
 #Boutons pour les chiffres de 0 à 9
 #affichage des boutons de 1 à 9
 for i in range(3):
@@ -389,7 +391,7 @@ Button(bottomFrame, text="x", command=lambda: update_function("x"), font=("Helve
 Button(bottomFrame, text="(", command=lambda: update_function("("), font=("Helvetica",20)).grid(row=1, column=8, sticky='ew')
 Button(bottomFrame, text=")", command=lambda: update_function(")"), font=("Helvetica",20)).grid(row=2, column=8, sticky='ew')
 
-def sqrt(x):
+def root2(x):
     return x**(1/2)
 def cbrt(x):
     return x**(1/3)
@@ -398,10 +400,10 @@ def root4(x):
 
 def f(x):
     try:
-        functionFormated = function.replace("^", "**").replace("√", "sqrt").replace("∛", "cbrt").replace("∜", "root4").replace("sin", "np.sin").replace("cos", "np.cos").replace("tan", "np.tan").replace("log", "np.log10").replace("ln", "np.log").replace("exp", "np.exp").replace("abs", "abs").replace("π", "np.pi")
+        functionFormated = function.replace("^", "**").replace("√", "root2").replace("∛", "cbrt").replace("∜", "root4").replace("sin", "np.sin").replace("cos", "np.cos").replace("tan", "np.tan").replace("log", "np.log10").replace("ln", "np.log").replace("exp", "np.exp").replace("abs", "abs").replace("π", "np.pi")
         return eval(functionFormated)
     except:
-        return 0
+        return nan
 
 plt.style.use("dark_background") # fond noir pour le graphe
 plt.ion() # on active l'affichage en temps réel
@@ -415,17 +417,16 @@ ax.spines['bottom'].set_position(('data', 0))
 ax.spines['right'].set_color('none')
 ax.spines['top'].set_color('none')
 
-# limitation du la vue du graphe au début
-plt.xlim(-10, 10)   # pour l'axe des x  
-plt.ylim(-10, 10)   # pour l'axe des y
-
-# on appelle la fonction de zoom pour l'activer
+# on appelle la fonction qui active le zoomage
 g = activer_zoom(ax)
 
 # plot les fonctions
 plt.plot(x, x, 'y', label="f(x)")
 plt.legend(loc='upper left')
 
+# limitation du la vue du graphe au début
+plt.xlim(-10, 10)   # pour l'axe des x  
+plt.ylim(-10, 10)   # pour l'axe des y
 
 # creation du canvas pour le graphe
 canvas = FigureCanvasTkAgg(fig, master = graphFrame)  
