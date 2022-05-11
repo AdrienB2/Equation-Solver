@@ -202,7 +202,6 @@ def detListeZero(methode):
             # il faut s'assurer que le zéro trouvé n'est pas déjà répertorié
             if not a in liste_zero:
                 liste_zero.append(a)
-                print(liste_zero)
 
     # retourne à la toute fin la liste des zéros 
     return liste_zero
