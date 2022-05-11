@@ -19,8 +19,8 @@ function = ""
 # variable contenant la position des zéros
 strZeros = ""
 # borne entre lesquelles la fonction sera affichée
-borneInf = -20
-borneSup = 20
+borneInf = -10
+borneSup = 10
 
 
 
@@ -42,6 +42,7 @@ operations=["+","-","*","/","^", "√","∛", "∜","sin","cos","tan", "π", "lo
 #FONCTIONS#
 ###########
 
+
 # la fonction f dont on cherche les zéros
 def f(x):
     # essaye d'évaluer la fonction en x
@@ -58,6 +59,7 @@ def derivative(f, x):
     # utilisation de la définition de la dérivée avec la limite ; f'(a) = lim h->0 ((f(a + h) - f(a))/h)
     f1 = f(x)
     f2 = f(x + h)
+
     fDerivee = (f2 - f1)/h  
     return fDerivee
 
@@ -68,7 +70,7 @@ def newtonRaphson(f, a):
     anti_bug = 0        # possibilité d'osciller entre deux points
     try:
         # tant que la valeur f(a) n'est pas proche de 0 (ou que anti-bug est trop élevé)
-        while abs(f(a)) > h/1000 and anti_bug < 1000:
+        while abs(f(a)) > h/100 and anti_bug < 1000:
             # si la dérivée est nulle, retourne une erreur
             if abs(derivative(f, a)) == 0:
                 return "Erreur"
@@ -79,7 +81,7 @@ def newtonRaphson(f, a):
                 # incrémentation de l'anti-bug
                 anti_bug += 1
         # si il n'y a pas d'oscillation
-        if anti_bug < 1000 and abs(f(a)) < h/1000:
+        if anti_bug < 1000 and abs(f(a)) < h/100:
             # si on arrive ici, alors ça veut dire que f(a) est nulle, donc c'est un zero
             return a
         # si il y a une oscillation, retourne une erreur
@@ -94,7 +96,6 @@ def newtonRaphson(f, a):
         # sinon, retourne une erreur
         else:
             return "Erreur"
-
 
 # méthode de dichotomie, la fonction retourne un zero de la fonction (à améliorer / commentaires)
 def dichotomie(f, a, b):
@@ -184,7 +185,9 @@ def detListeZero(methode):
     # liste qui stocke les zeros
     liste_zero = []
     # boucle sur x pour déterminer beaucoup de zéros avec les deux techniques
-    for x in range(borneInf, borneSup+1):
+    for x in range(4*borneInf, 4*borneSup+1):
+        # on divise x par 4 pour avoir beaucoup de possiblités de zéros
+        x = x/4
         # si la méthode est Newton-Raphson
         if methode == "Newton-Raphson":
             # détermination d'un zero à partir de x
@@ -192,7 +195,7 @@ def detListeZero(methode):
         # si la méthode est la dichotomie
         elif methode == "Dichotomie":
             # détermination d'un zero entre x et x+1
-            a = dichotomie(f, x, x+1)
+            a = dichotomie(f, x, x+(1/4))
         else:
             return []
         # si a n'est pas une erreur, on peut continuer
@@ -205,7 +208,6 @@ def detListeZero(methode):
 
     # retourne à la toute fin la liste des zéros 
     return liste_zero
-
 
 
 ##########################
