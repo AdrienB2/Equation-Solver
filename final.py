@@ -19,8 +19,8 @@ function = ""
 # variable contenant la position des zéros
 strZeros = ""
 # borne entre lesquelles la fonction sera affichée
-borneInf = -100
-borneSup = 100
+borneInf = -20
+borneSup = 20
 
 
 
@@ -197,25 +197,12 @@ def detListeZero(methode):
             return []
         # si a n'est pas une erreur, on peut continuer
         if a != "Erreur":
-            ##### la partie ci-dessous est très utile pour corriger les fonctions qui tendent vers 0, mais elle cause des bugs dans le fonctions qui croisent 0 mais ne changent pas de signe. À garder ????
-            # évite le cas de fonctions qui tendent vers l'infini (comme e^x)
-            if f(round(a, 8)) != 0 and f(a) != 0:
-                # si il n'y a pas d'erreurs de f dans le voisinage de x
-                if f(a+h) != nan and f(a-h) != nan:
-                    # si le signe de f(a+h) n'est pas égal à celui de f(a-h), alors il y a un zéro en a
-                    if abs(f(a+h))/f(a+h) != abs(f(a-h))/f(a-h):
-                        # arrondi du zéro trouvé à 10^(-8)
-                        a = round(a, 8)
-                        # il faut s'assurer que le zéro trouvé n'est pas déjà répertorié
-                        if not a in liste_zero:
-                            liste_zero.append(a)
-            ######
-            else:
-                # arrondi du zéro trouvé à 10^(-8)
-                a = round(a, 8)
-                # il faut s'assurer que le zéro trouvé n'est pas déjà répertorié
-                if not a in liste_zero:
-                    liste_zero.append(a)
+            # arrondi du zéro trouvé à 10^(-8)
+            a = round(a, 8)
+            # il faut s'assurer que le zéro trouvé n'est pas déjà répertorié
+            if not a in liste_zero:
+                liste_zero.append(a)
+                print(liste_zero)
 
     # retourne à la toute fin la liste des zéros 
     return liste_zero
