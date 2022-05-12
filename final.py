@@ -41,7 +41,6 @@ operations=["+","-","*","/","^", "√","∛", "∜","sin","cos","tan", "π", "lo
 #FONCTIONS#
 ###########
 
-
 # la fonction f dont on cherche les zéros
 def f(x):
     # essaye d'évaluer la fonction en x
@@ -184,7 +183,7 @@ def detListeZero(methode):
     # liste qui stocke les zeros
     liste_zero = []
     # boucle sur x pour déterminer beaucoup de zéros avec les deux techniques
-    for x in range(40, 41):
+    for x in range(-40, 41):
         # on divise x par 4 pour avoir beaucoup de possiblités de zéros
         x = x/4
         # si la méthode est Newton-Raphson
@@ -199,14 +198,15 @@ def detListeZero(methode):
             return []
         # si a n'est pas une erreur, on peut continuer
         if a != "Erreur":
-            # arrondi du zéro trouvé à 10^(-8)
-            a = round(a, 8)
+            # arrondi du zéro trouvé à 10^(-5)
+            a = round(a, 5)
             # il faut s'assurer que le zéro trouvé n'est pas déjà répertorié
             if not a in liste_zero:
                 liste_zero.append(a)
 
     # retourne à la toute fin la liste des zéros 
     return liste_zero
+
 
 
 ##########################
@@ -219,17 +219,21 @@ def activer_zoom(ax):
     # fonction qui zoome une fois sur le graphe
     def zoom(event):
         global borneInf, borneSup
-        if event.button == "down":
-            # zoom in
-            scale_factor = 1/1.05
-        elif event.button == "up":
-            # zoom out
-            scale_factor = 1.05
         
         # définiton des nouvelles limites
-        borneInf *= scale_factor
-        borneSup *= scale_factor
-    
+        #zoom in
+        if event.button == "down":
+            # si les limites actuelles sont assez grandes
+            if borneInf < -0.0001 and borneSup > 0.0001:
+                borneInf *= 1/1.05
+                borneSup *= 1/1.05
+        #zoom out
+        if event.button == "up":
+            # si les limites actuelles sont assez grandes
+            if borneInf > -10000 and borneSup < 10000:
+                borneInf *= 1.05
+                borneSup *= 1.05
+
 
         # mise des nouvelles limites dans le grapheur
         ax.set_xlim([borneInf, borneSup])
@@ -268,34 +272,6 @@ def solve():
     # update du texte dans zone de texte qui montre les zéros
     zeroLabel.config(text=strZeros)
 
-# fonction exectutée lorsque l'utilisateur clique sur un bouton qui modifie la fonction, pour actualiser la fonction dans la variable et l'afficher
-def update_function(stringToAdd):
-    # global permet d'avoir partout la même référence à la variable "function" 
-    global function
-    
-    # si il y a deux opérations conséqutives, la fonction n'est pas valable
-    if stringToAdd in ["+", "-", "*", "/", "^"]:
-        return
-    # si il y a une opération à la fin de la fonction, la fonction n'est pas valable
-    elif function[-1] in  ["+", "-", "*", "/", "^"]:
-        return
-    
-    # si le bouton appuyé est "delete", on enlève le dernier élément
-    if stringToAdd == "DEL":
-        function = function[:-1]
-    # sinon, on ajoute le terme présent sur le bouton choisi
-    else:
-        function += stringToAdd
-    # si le terme est une fonction, on est obligé de mettre les parenthèses
-    if stringToAdd in ["sin","cos","tan","log","ln","exp","abs","√","∛", "∜"]:
-        function += "("
-    
-    # actualisation du champ de texte dans lequel il y a la fonction affichée
-    functionInput.delete(0,END)
-    functionInput.insert(0,function)
-    # si la fonction est réussite, on actualise le graphe
-    update_graph()
-
 # fonction appelée losque l'utilisateur modifie le champ de texte de la fonciton
 def inputChange():
     # global permet d'avoir partout la même référence à la variable "function" 
@@ -308,7 +284,7 @@ def inputChange():
 # fonction qui actualise l'affichage du graphique
 def update_graph():
     # redéfinition de l'ensemble des x qui est plot
-    x = np.linspace(borneInf, borneSup, d)
+    x = np.linspace(-10000, 10000, d)
     # clear du plot
     plt.cla()
     # redessinage du graphe
@@ -318,9 +294,9 @@ def update_graph():
     # la commande 'data' permet de positionner correctement les axes par rapport à la fonction, c.à.d en (0,0)
     ax.spines['left'].set_position(('data', 0)) 
     ax.spines['bottom'].set_position(('data', 0))
-    # limitation du la vue du graphe au début
-    plt.xlim(-10, 10)   # pour l'axe des x  
-    plt.ylim(-10, 10)   # pour l'axe des y
+    # restrictions du graphique 
+    ax.set_xlim([borneInf, borneSup])
+    ax.set_ylim([borneInf, borneSup])
     # dessinage du plot dans la fenêtre tkinter
     canvas.draw()
 
@@ -372,48 +348,10 @@ bottomFrame = Frame(root)    # création d'une zone l'où l'on mettera les bouto
 bottomFrame.grid(row=1, column=0, columnspan=2) # mise de la zone tout en bas au milieu (avec columnspan)
 
 
-
-# boutons pour les chiffres de 0 à 9
-
-# affichage des boutons de 1 à 9, qui appelent toutes la fonction update_fonction(), avec paramètre leur chiffre respectif
-for i in range(3):
-    for j in range(3):
-        # on boucle doublement pour avoir 3 boutons par ligne
-        Button(bottomFrame, text=str(i*3+j+1), command=lambda x=str(i*3+j+1): update_function(x), font=("Helvetica",20)).grid(row=i, column=j)
-# affichage des boutons de 0
-Button(bottomFrame, text="0", command=lambda: update_function("0"), font=("Helvetica",20)).grid(row=3, column=0, columnspan=2, sticky='ew')
-# bouton pour la virgule
-Button(bottomFrame, text=".", command=lambda: update_function("."), font=("Helvetica",20)).grid(row=3, column=2, sticky='ew')
-
-# juste pour avoir une marge entre les chiffre et les opérations
-Label(bottomFrame, text=" ").grid(row=0, column=3, sticky='ew', padx=5)
-
-# création des boutons pour les opérations
-for i in range(4):
-    for j in range(4):
-        # on boucle doublement pour avoir 4 boutons par ligne
-        Button(bottomFrame, text=operations[i+4*j], command=lambda x=operations[i+4*j]: update_function(x), font=("Helvetica",20)).grid(row=i, column=j + 4, sticky='ew')
-
-# creation du bouton pour delete
-Button(bottomFrame, text="←", command=lambda: update_function("DEL"), font=("Helvetica",20)).grid(row=3, column=8, sticky='ew')
-# creation des boutons pour x, (, )
-Button(bottomFrame, text="x", command=lambda: update_function("x"), font=("Helvetica",20)).grid(row=0, column=8, sticky='ew')
-Button(bottomFrame, text="(", command=lambda: update_function("("), font=("Helvetica",20)).grid(row=1, column=8, sticky='ew')
-Button(bottomFrame, text=")", command=lambda: update_function(")"), font=("Helvetica",20)).grid(row=2, column=8, sticky='ew')
-
-# on définit des fonctions de racine pour que python les comprenne
-def root2(x):
-    return x**(1/2)
-def cbrt(x):
-    return x**(1/3)
-def root4(x):
-    return x**(1/4)
-
-
 plt.style.use("dark_background") # fond noir pour le graphe
 plt.ion() # on active l'affichage en temps réel
 # crée n éléments (inversement proportionnel à d) qu'on va plot dans la fonction entre les bornes choisies
-x = np.linspace(borneInf, borneSup, d)
+x = np.linspace(-10000, 10000, d)
 
 # création de la figure du graphe
 fig = plt.figure()
@@ -425,12 +363,12 @@ ax.spines['bottom'].set_position(('data', 0))
 ax.spines['right'].set_color('none')
 ax.spines['top'].set_color('none')
 
-# on appelle la fonction qui active le zoomage
-g = activer_zoom(ax)
-
 # plot les fonctions
 plt.plot(x, x, 'y', label="f(x)")
 plt.legend(loc='upper left')
+
+# on appelle la fonction qui active le zoomage
+g = activer_zoom(ax)
 
 # limitation du la vue du graphe au début
 plt.xlim(-10, 10)   # pour l'axe des x  
@@ -443,5 +381,5 @@ canvas.draw()
 # affichage du graphe
 canvas.get_tk_widget().pack(fill=BOTH, expand=1)
 
-
+# affichage de la fenêtre tkinter
 root.mainloop()
