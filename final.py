@@ -3,7 +3,6 @@ from tkinter import *
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import numpy as np
-import math as math
 from matplotlib.axis import Axis
 from numpy import e, sin, cos, tan, sqrt
 from cmath import nan
@@ -185,7 +184,7 @@ def detListeZero(methode):
     # liste qui stocke les zeros
     liste_zero = []
     # boucle sur x pour déterminer beaucoup de zéros avec les deux techniques
-    for x in range(4*borneInf, 4*borneSup+1):
+    for x in range(40, 41):
         # on divise x par 4 pour avoir beaucoup de possiblités de zéros
         x = x/4
         # si la méthode est Newton-Raphson
@@ -216,36 +215,25 @@ def detListeZero(methode):
 
 # fonction pour activer le zoomage sur le graphe
 def activer_zoom(ax):
+    global borneInf, borneSup
     # fonction qui zoome une fois sur le graphe
     def zoom(event):
-        # on prends les limites actuelles de l'axe x et y
-        cur_xlim = ax.get_xlim()
-        cur_ylim = ax.get_ylim()
-
-        # on définit la longueur des intervalles dans lesquelles sont définies la fonction
-        xrange = (cur_xlim[1] - cur_xlim[0])/2
-        yrange = (cur_ylim[1] - cur_ylim[0])/2
-
-        # on prends la location du curseur, là on l'on veut zoomer
-        zoomToX = event.xdata  
-        zoomToY = event.ydata  
-
-        if event.button == "up":
+        global borneInf, borneSup
+        if event.button == "down":
             # zoom in
             scale_factor = 1/1.05
-        elif event.button == "down":
+        elif event.button == "up":
             # zoom out
             scale_factor = 1.05
         
         # définiton des nouvelles limites
-        x_inf = zoomToX - xrange*scale_factor
-        x_sup = zoomToX + xrange*scale_factor
-        y_inf = zoomToY - yrange*scale_factor
-        y_sup = zoomToY + yrange*scale_factor
+        borneInf *= scale_factor
+        borneSup *= scale_factor
+    
 
         # mise des nouvelles limites dans le grapheur
-        ax.set_xlim([x_inf, x_sup])
-        ax.set_ylim([y_inf, y_sup])
+        ax.set_xlim([borneInf, borneSup])
+        ax.set_ylim([borneInf, borneSup])
 
         # redessine la fonction avec les nouvelles limites
         plt.draw()
@@ -425,7 +413,7 @@ def root4(x):
 plt.style.use("dark_background") # fond noir pour le graphe
 plt.ion() # on active l'affichage en temps réel
 # crée n éléments (inversement proportionnel à d) qu'on va plot dans la fonction entre les bornes choisies
-x = np.linspace(-1000, 1000, d)
+x = np.linspace(borneInf, borneSup, d)
 
 # création de la figure du graphe
 fig = plt.figure()
