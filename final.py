@@ -1,39 +1,37 @@
 ### Import des librairies utilisée par le programme
-from tkinter import *
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-import numpy as np
-from matplotlib.axis import Axis
-from numpy import e, sin, cos, tan, sqrt
-from cmath import nan
+from tkinter import * #interface graphique
+import matplotlib.pyplot as plt #graphe de la fonction
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg #lien tkinter et matplotlib
+import numpy as np #numpy est une librairie pour les calculs (p.ex. fonctions mathématiques comme sin ou exp)
+from matplotlib.axis import Axis #permet de modifier les axes du graphe (centrer, pas de graduation, etc.)
+from cmath import nan #nan = not a number (pour pas interrompre la fct quand il y a message d'erreur)
 
 
 
 ####################
-#VARIABLES GLOBALES#
+#VARIABLES GLOBALES# variable (modifiable) utilisable dans tout le code (fonctions y compris)
 ####################
 
-# variable contenant la fonction en string
-function = ""
-# variable contenant la position des zéros
+# variable contenant la fonction sous forme de chaine de caractères (string), un message ou texte
+function = "" #guillemets délimitent le string
+# variable contenant la position des zéros (aussi un string)
 strZeros = ""
-# borne entre lesquelles la fonction sera affichée
+# bornes initiales entre lesquelles la fonction sera affichée (changent lorsqu'on zoom)
 borneInf = -10
 borneSup = 10
 
 
 
 #####################
-#CONSTANTES GLOBALES#
+#CONSTANTES GLOBALES# ne change pas dans le code
 #####################
 
-# nombres de x vérifiés dans le graphe
-d = 10000
+# nombres de x vérifiés dans le graphe (pour le dessiner)
+d = 1000000
 # le h va déterminer l'ordre de précision de la dérivée
 # h = 0.000000000001 est la plus petite valeur que Python supporte
 h = 0.000000000001
 # liste des operations/fonctions/constantes
-operations=["+","-","*","/","^", "√","∛", "∜","sin","cos","tan", "π", "log","ln","exp", "abs"]
 
 
 
@@ -45,8 +43,17 @@ operations=["+","-","*","/","^", "√","∛", "∜","sin","cos","tan", "π", "lo
 def f(x):
     # essaye d'évaluer la fonction en x
     try:
-        # on reformate la fonction avec des opérations connues par python
-        functionFormated = function.replace("^", "**").replace("√", "root2").replace("∛", "cbrt").replace("∜", "root4").replace("sin", "np.sin").replace("cos", "np.cos").replace("tan", "np.tan").replace("log", "np.log10").replace("ln", "np.log").replace("exp", "np.exp").replace("abs", "abs").replace("π", "np.pi")
+        # on reformate la fonction (string écrit par l'utilisateur) avec des opérations connues par python
+        functionFormated = function.replace("^", "**")
+        functionFormated = functionFormated.replace("sin", "np.sin")
+        functionFormated = functionFormated.replace("cos", "np.cos")
+        functionFormated = functionFormated.replace("tan", "np.tan")
+        functionFormated = functionFormated.replace("log", "np.log10")
+        functionFormated = functionFormated.replace("ln", "np.log")
+        functionFormated = functionFormated.replace("exp", "np.exp")
+        functionFormated = functionFormated.replace("pi", "np.pi")
+        functionFormated = functionFormated.replace("sqrt", "np.sqrt")
+        functionFormated = functionFormated.replace("e", "np.e")
         return eval(functionFormated)
     # si elle y arrive pas, retourne un nan ("Not A Number")
     except:
@@ -65,9 +72,9 @@ def derivative(f, x):
 def newtonRaphson(f, a):
     
     # "a" est point autour duquel la tangente se fait
-    anti_bug = 0        # possibilité d'osciller entre deux points
+    anti_bug = 0        # évite la possibilité d'osciller entre deux points
     try:
-        # tant que la valeur f(a) n'est pas proche de 0 (ou que anti-bug est trop élevé)
+        # tant que la valeur f(a) n'est pas proche de 0 (ou que anti-bug est pas trop élevé)
         while abs(f(a)) > h/100 and anti_bug < 1000:
             # si la dérivée est nulle, retourne une erreur
             if abs(derivative(f, a)) == 0:
@@ -77,7 +84,7 @@ def newtonRaphson(f, a):
                 # comme on l'a vu en classe : f(a)+f'(a)*(x-a) = 0  =>  (-f(a)/f'(a)) + a = x
                 a = -f(a)/derivative(f, a) + a
                 # incrémentation de l'anti-bug
-                anti_bug += 1
+                anti_bug = anti_bug + 1
         # si il n'y a pas d'oscillation
         if anti_bug < 1000 and abs(f(a)) < h/100:
             # si on arrive ici, alors ça veut dire que f(a) est nulle, donc c'est un zero
@@ -144,11 +151,11 @@ def dichotomie(f, a, b):
 
     # Etape 3: méthode de dichotomie, si abs(f(x)) < 10^(-précision) alors on arrête la boucle et on retourne x
     anti_bug = 0    # variable anti_bug évite les cas où la fonction n'est pas continue 
-    while anti_bug < 100:
+    while anti_bug < 1000:
         # try est nécessaire pour éviter le cas où f((a+b)/2) est nan
         try:
             # tant que f((a+b)/2) n'est un zéro, on continue de chercher
-            while abs(f((a+b)/2))>h:
+            while abs(f((a+b)/2))>h/100:
                 # si f((a+b)/2) est inférieur à zéro, ...
                 if f((a+b)/2)<0:
                     # ... et f(a) inférieur à zéro, alors a doit se rapprocher plus de b
@@ -192,7 +199,7 @@ def detListeZero(methode):
             a = newtonRaphson(f, x)
         # si la méthode est la dichotomie
         elif methode == "Dichotomie":
-            # détermination d'un zero entre x et x+1
+            # détermination d'un zero entre x et x+1/4
             a = dichotomie(f, x, x+(1/4))
         else:
             return []
@@ -200,7 +207,11 @@ def detListeZero(methode):
         if a != "Erreur":
             # arrondi du zéro trouvé à 10^(-5)
             a = round(a, 5)
-            # il faut s'assurer que le zéro trouvé n'est pas déjà répertorié
+
+            # si a = -0 alors on le remplace par 0
+            if abs(a) == 0:
+                a = 0
+            # il faut s'assurer que le zéro trouvé n'est pas déjà répertorié dans la liste
             if not a in liste_zero:
                 liste_zero.append(a)
 
@@ -215,7 +226,6 @@ def detListeZero(methode):
 
 # fonction pour activer le zoomage sur le graphe
 def activer_zoom(ax):
-    global borneInf, borneSup
     # fonction qui zoome une fois sur le graphe
     def zoom(event):
         global borneInf, borneSup
@@ -248,9 +258,6 @@ def activer_zoom(ax):
     # on connecte l'évenement "scroll" avec la fonction de zoomage
     fig.canvas.mpl_connect('scroll_event', zoom)
 
-    # retourne la fonction
-    return zoom
-
 # fonciton exectutée lorsque l'utilisateur clique sur le bouton "calculer", pour déterminer les zeros de f
 def solve():
     # global permet d'avoir partout la même référence à la variable "strZeros" et "zeroLabel" 
@@ -260,14 +267,14 @@ def solve():
     # calcule la liste des zeros selon la méthode choisie
     liste_zero = detListeZero(methode)
     strZeros = ""
-    for y in range(len(liste_zero)): # prend 1 à 1 chaque zéro trouvé 
+    for j in range(len(liste_zero)): # prend 1 à 1 chaque zéro trouvé 
         # affiche le zéro sur le graphique
-        plt.plot(liste_zero[y], 0, 'o')
+        plt.plot(liste_zero[j], 0, 'o')# 'o' permet de mettre un point sur le graphique
         # orthographe française ; le 1er zéro doit être marqué comme "1er", pas "1eme"
-        if y == 0:
-            strZeros += f"\n Le 1er zéro de la fonction est en x = {liste_zero[y]}"
+        if j == 0:
+            strZeros += f"\n Le 1er zéro de la fonction est en x = {liste_zero[j]}" # le \n permet de 
         else:
-            strZeros += f"\n Le {y+1}ème zéro de la fonction est en x = {liste_zero[y]}"
+            strZeros += f"\n Le {j+1}ème zéro de la fonction est en x = {liste_zero[j]}"
 
     # update du texte dans zone de texte qui montre les zéros
     zeroLabel.config(text=strZeros)
