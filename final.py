@@ -272,7 +272,7 @@ def solve():
         plt.plot(liste_zero[j], 0, 'o')# 'o' permet de mettre un point sur le graphique
         # orthographe française ; le 1er zéro doit être marqué comme "1er", pas "1eme"
         if j == 0:
-            strZeros += f"\n Le 1er zéro de la fonction est en x = {liste_zero[j]}" # le \n permet de 
+            strZeros += f"\n Le 1er zéro de la fonction est en x = {liste_zero[j]}" # le \n permet de faire un retour à la ligne
         else:
             strZeros += f"\n Le {j+1}ème zéro de la fonction est en x = {liste_zero[j]}"
 
