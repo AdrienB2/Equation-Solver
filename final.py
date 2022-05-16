@@ -50,7 +50,7 @@ def f(x):
         functionFormated = functionFormated.replace("tan", "np.tan")
         functionFormated = functionFormated.replace("log", "np.log10")
         functionFormated = functionFormated.replace("ln", "np.log")
-        functionFormated = functionFormated.replace("exp", "np.exp")
+        functionFormated = functionFormated.replace("exp", "e**")
         functionFormated = functionFormated.replace("pi", "np.pi")
         functionFormated = functionFormated.replace("sqrt", "np.sqrt")
         functionFormated = functionFormated.replace("e", "np.e")
@@ -266,6 +266,7 @@ def solve():
     methode = methodeStr.get()
     # calcule la liste des zeros selon la méthode choisie
     liste_zero = detListeZero(methode)
+    liste_zero.sort() # tri de la liste par ordre croissant
     strZeros = ""
     for j in range(len(liste_zero)): # prend 1 à 1 chaque zéro trouvé 
         # affiche le zéro sur le graphique
@@ -292,19 +293,19 @@ def inputChange():
 def update_graph():
     # redéfinition de l'ensemble des x qui est plot
     x = np.linspace(-10000, 10000, d)
-    # clear du plot
+    # efface l'ancien graphique de la fonction
     plt.cla()
-    # redessinage du graphe
+    # redessine le graphe / 'y' est un type d'affichage de la fonction 
     plt.plot(x, f(x), 'y', label="f(x)")
-    # choix de la location du plot
+    # choix de la location de la légende de la fonction "f(x)"
     plt.legend(loc='upper left')
     # la commande 'data' permet de positionner correctement les axes par rapport à la fonction, c.à.d en (0,0)
-    ax.spines['left'].set_position(('data', 0)) 
-    ax.spines['bottom'].set_position(('data', 0))
+    ax.spines['left'].set_position(('data', 0)) # axe des y
+    ax.spines['bottom'].set_position(('data', 0))   # axe des x
     # restrictions du graphique 
     ax.set_xlim([borneInf, borneSup])
     ax.set_ylim([borneInf, borneSup])
-    # dessinage du plot dans la fenêtre tkinter
+    # dessin du graphe dans la fenêtre tkinter
     canvas.draw()
 
 
@@ -313,17 +314,17 @@ def update_graph():
 #INTERFACE#
 ###########
 
-root = Tk() # création de la fenêtre
-root.title("Equation Solver") # titre de la fenêtre
-root.state('zoomed') # fenêtre maximisée (pas en plein écran)
+fenetre = Tk() # création de la fenêtre
+fenetre.title("Equation Solver") # titre de la fenêtre
+fenetre.state('zoomed') # fenêtre maximisée (pas en plein écran)
 
-root.columnconfigure(1, weight=1) # permet à la colone contenant le grphique de prendre toute la largeur de la fenêtre
-root.rowconfigure(0, weight=1) # permet à la ligne du haut de prendre toute la hauteur de la fenêtre
+fenetre.columnconfigure(1, weight=1) # permet à la colonne contenant le graphique de prendre toute la largeur de la fenêtre
+fenetre.rowconfigure(0, weight=1) # permet à la ligne du haut de prendre toute la hauteur de la fenêtre
 
-leftFrame = Frame(root) # création d'une zone l'où l'on pourra mettre d'autres zones (comme du texte p.ex)
+leftFrame = Frame(fenetre) # création d'une zone où l'on pourra mettre d'autres zones (comme du texte p.ex)
 leftFrame.grid(row=0, column=0) # mise de la zone tout en haut à gauche ((0,0) est tout en haut à gauche du tkinter)
 
-# création d'une zone de texte l'où écrit : "Méthode de résolution"
+# création d'une zone de texte où l'on écrit : "Méthode de résolution"
 methodeStr = StringVar() 
 methodeStr.set("Méthode de résolution")
 methodeMenu = OptionMenu(leftFrame, methodeStr, "Newton-Raphson", "Dichotomie") # création d'une zone choix multiple (menu) l'où écrit il y a : "Newton-Raphson" et "Dichotomie"
@@ -332,13 +333,13 @@ methodeMenu.pack(side=TOP, fill=X)  # mise du menu dans la zone "leftFrame", le 
 functionInputFrame = Frame(leftFrame)    # création d'une zone l'où mettera l'input de la fonction
 functionInputFrame.pack(fill=X, side=TOP)   # mise de la zone dans la zone "leftFrame", le plus en haut possible 
 
-# création d'une zone de texte l'où écrit : "f(x) = " à gauche 
+# création d'une zone de texte où l'on écrit : "f(x) = " à gauche 
 functionLabel = Label(functionInputFrame, text="f(x) = ")   
 functionLabel.pack(side=LEFT)
 # création d'une zone où l'on peut écrire la fonction, à droite 
 functionInput = Entry(functionInputFrame)
 functionInput.pack(side=RIGHT, fill=X)
-# Connection entre l'événement "Relachement de touche" et la fonction inputChange()
+# Liaison entre l'événement "Relachement de touche" et la fonction inputChange()
 functionInput.bind("<KeyRelease>", lambda event: inputChange())
 
 calculer = Button(leftFrame, text="Calculer", command=solve)    # création d'un bouton qui va appeler la fonction solve()
@@ -347,12 +348,8 @@ calculer.pack(side=TOP, fill=X)  # mise du bouton dans la zone "leftFrame", le p
 zeroLabel = Label(leftFrame, text=strZeros) # zone de texte dans la zone de gauche, qui montre les zéros
 zeroLabel.pack()    # mise de la zone de texte sur la zone de gauche
 
-graphFrame = Frame(root)    # création d'une zone l'où l'on mettera le graphique
+graphFrame = Frame(fenetre)    # création d'une zone l'où l'on mettera le graphique
 graphFrame.grid(row=0, column=1, sticky=N+S+E+W)    # mise de la zone tout en haut à droite
-
-
-bottomFrame = Frame(root)    # création d'une zone l'où l'on mettera les boutons comme sur la calculette
-bottomFrame.grid(row=1, column=0, columnspan=2) # mise de la zone tout en bas au milieu (avec columnspan)
 
 
 plt.style.use("dark_background") # fond noir pour le graphe
@@ -362,31 +359,33 @@ x = np.linspace(-10000, 10000, d)
 
 # création de la figure du graphe
 fig = plt.figure()
-# création de 2 axes dans la figure
+# création des axes dans la figure
 ax = fig.add_subplot(1, 1, 1)
 # la commande 'data' permet de positionner correctement les axes par rapport à la fonction (ici en (0,0))
-ax.spines['left'].set_position(('data', 0)) 
-ax.spines['bottom'].set_position(('data', 0))
-ax.spines['right'].set_color('none')
+ax.spines['left'].set_position(('data', 0)) # axe des y
+ax.spines['bottom'].set_position(('data', 0))   # axe des x
+# on rend invisible les axes du haut et de droite
+ax.spines['right'].set_color('none')    
 ax.spines['top'].set_color('none')
 
-# plot les fonctions
+# plot du graphique de la fonction f(x) = x au lancement du programme
 plt.plot(x, x, 'y', label="f(x)")
 plt.legend(loc='upper left')
 
-# on appelle la fonction qui active le zoomage
-g = activer_zoom(ax)
+# on appelle la fonction qui active le zoom
+activer_zoom(ax)
 
 # limitation du la vue du graphe au début
 plt.xlim(-10, 10)   # pour l'axe des x  
 plt.ylim(-10, 10)   # pour l'axe des y
 
-# creation du canvas pour le graphe
-canvas = FigureCanvasTkAgg(fig, master = graphFrame)  
+# creation du canvas pour le graphe (lien entre Tkinter et matplotlib)
+canvas = FigureCanvasTkAgg(fig, master=graphFrame)  
+# dessine le graphique
 canvas.draw()
 
-# affichage du graphe
+# récupération pour l'affichage du graphe
 canvas.get_tk_widget().pack(fill=BOTH, expand=1)
 
 # affichage de la fenêtre tkinter
-root.mainloop()
+fenetre.mainloop()
