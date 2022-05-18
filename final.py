@@ -33,11 +33,10 @@ borneSup = 10
 
 # nombres de x vérifiés dans le graphe (pour le dessiner)
 d = 1000000
-# le h1 va déterminer l'ordre de précision de la dérivée
+# le h1 va déterminer l'ordre de précision de la dérivée et des zéros
 # h1 = 0.000000000001 est une des plus petites valeurs que Python supporte en termes de calcul 
 h1 = 0.000000000001
-# h2 = h1/100000 va déterminer la précision des zéros (une des plus petites valeurs que Python supporte en termes de comparaison)
-h2 = h1/100000
+
 
 
 
@@ -74,7 +73,7 @@ def derivative(f, x):
     # utilisation de la définition de la dérivée avec la limite ; f'(a) = lim h->0 ((f(a + h) - f(a))/h)
     f1 = f(x)
     f2 = f(x + h1)
-    
+
     fDerivee = (f2 - f1)/h1 
     return fDerivee
 
@@ -85,7 +84,7 @@ def newtonRaphson(f, a):
     anti_bug = 0        # évite la possibilité d'osciller entre deux points
     try:
         # tant que la valeur f(a) n'est pas proche de 0 (ou que anti-bug est pas trop élevé)
-        while abs(f(a)) > h2 and anti_bug < 1000:
+        while abs(f(a)) > h1 and anti_bug < 1000:
             # si la dérivée est nulle, retourne une erreur
             if abs(derivative(f, a)) == 0:
                 return "Erreur"
@@ -96,7 +95,7 @@ def newtonRaphson(f, a):
                 # incrémentation de l'anti-bug
                 anti_bug = anti_bug + 1
         # si il n'y a pas d'oscillation
-        if anti_bug < 1000 and abs(f(a)) < h2:
+        if anti_bug < 1000 and abs(f(a)) < h1:
             # si on arrive ici, alors ça veut dire que f(a) est nulle, donc c'est un zero
             return a
         # si il y a une oscillation, retourne une erreur
@@ -165,7 +164,7 @@ def dichotomie(f, a, b):
         # try est nécessaire pour éviter le cas où f((a+b)/2) est nan
         try:
             # tant que f((a+b)/2) n'est un zéro, on continue de chercher
-            while abs(f((a+b)/2))>h2:
+            while abs(f((a+b)/2))>h1:
                 # si f((a+b)/2) est inférieur à zéro, ...
                 if f((a+b)/2)<0:
                     # ... et f(a) inférieur à zéro, alors a doit se rapprocher plus de b
