@@ -1,10 +1,12 @@
-### Import des librairies utilisée par le programme
-from tkinter import * #interface graphique
-import matplotlib.pyplot as plt #graphe de la fonction
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg #lien tkinter et matplotlib
-import numpy as np #numpy est une librairie pour les calculs (p.ex. fonctions mathématiques comme sin ou exp)
-from matplotlib.axis import Axis #permet de modifier les axes du graphe (centrer, pas de graduation, etc.)
-from cmath import nan #nan = not a number (pour pas interrompre la fct quand il y a message d'erreur)
+### Import des librairies utilisées par le programme
+# explication : "from mod import var" => on importe la variable ou fonction var disponible dans le module mod
+# explication : "import mod as abr" => on importe le module mod en tant que abr, c'est à dire lorsqu'on appele une fonction de ce module, on met "abr.fonction()"
+from tkinter import * # interface graphique
+import matplotlib.pyplot as plt # graphe de la fonction
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg # lien tkinter et matplotlib
+import numpy as np # numpy est une librairie pour les calculs (p.ex. fonctions mathématiques comme sin ou exp)
+from matplotlib.axis import Axis # permet de modifier les axes du graphe (centrer, pas de graduation, etc.)
+from cmath import nan # nan = not a number (pour pas interrompre la fct quand il y a message d'erreur)
 
 
 
@@ -13,10 +15,13 @@ from cmath import nan #nan = not a number (pour pas interrompre la fct quand il 
 ####################
 
 # variable contenant la fonction sous forme de chaine de caractères (string), un message ou texte
-function = "" #guillemets délimitent le string
+# cette variable sera la fonction f(x) sous forme de string
+function = "" # guillemets délimitent le string
 # variable contenant la position des zéros (aussi un string)
+# cette variable sera un string où l'on mettera tous les zéros explicitement (sous forme "Le premier zéro est en x = ... ")
 strZeros = ""
 # bornes initiales entre lesquelles la fonction sera affichée (changent lorsqu'on zoom)
+# ces valeurs vont être les bornes max et min de l'affichage de la fonction 
 borneInf = -10
 borneSup = 10
 
@@ -28,24 +33,26 @@ borneSup = 10
 
 # nombres de x vérifiés dans le graphe (pour le dessiner)
 d = 1000000
-# le h va déterminer l'ordre de précision de la dérivée
-# h = 0.000000000001 est la plus petite valeur que Python supporte
-h = 0.000000000001
-# liste des operations/fonctions/constantes
+# le h1 va déterminer l'ordre de précision de la dérivée
+# h1 = 0.000000000001 est une des plus petites valeurs que Python supporte en termes de calcul 
+h1 = 0.000000000001
+# h2 = h1/100000 va déterminer la précision des zéros (une des plus petites valeurs que Python supporte en termes de comparaison)
+h2 = h1/100000
 
 
 
 ###########
-#FONCTIONS#
+#FONCTIONS# pour calculer les zéros
 ###########
 
-# la fonction f dont on cherche les zéros
+# définition de la fonction f dont on cherche les zéros
 def f(x):
     # essaye d'évaluer la fonction en x
     try:
         # on reformate la fonction (string écrit par l'utilisateur) avec des opérations connues par python
-        functionFormated = function.replace("^", "**")
-        functionFormated = functionFormated.replace("sin", "np.sin")
+        # "...".replace("a", "ab") va remplacer tous les "a" par des "ab"
+        functionFormated = function.replace("^", "**")  # function est la variable contenant la fonction sous forme de string, et on définit functionFormated une forme formatée, où l'on a remplacé "^" par "**"
+        functionFormated = functionFormated.replace("sin", "np.sin")    # on re-formate functionFormated en remplacant "sin" par "np.sin" ...
         functionFormated = functionFormated.replace("cos", "np.cos")
         functionFormated = functionFormated.replace("tan", "np.tan")
         functionFormated = functionFormated.replace("log", "np.log10")
@@ -54,18 +61,21 @@ def f(x):
         functionFormated = functionFormated.replace("pi", "np.pi")
         functionFormated = functionFormated.replace("sqrt", "np.sqrt")
         functionFormated = functionFormated.replace("e", "np.e")
+        # return -> résultat de la fonction lorsqu'on l'appele
+        # eval("x**2") va retourner le résultat de x**2 en fonction du paramètre x
         return eval(functionFormated)
     # si elle y arrive pas, retourne un nan ("Not A Number")
     except:
+        # nan est utilisé lorsqu'on affiche la fonction; elle dit au grapheur que le x cherché n'a pas de résultat, est une valeur impossible
         return nan
 
 # fonction qui calcule la dérivée de f en x
 def derivative(f, x):
     # utilisation de la définition de la dérivée avec la limite ; f'(a) = lim h->0 ((f(a + h) - f(a))/h)
     f1 = f(x)
-    f2 = f(x + h)
-
-    fDerivee = (f2 - f1)/h  
+    f2 = f(x + h1)
+    
+    fDerivee = (f2 - f1)/h1 
     return fDerivee
 
 # fonction qui trouve les 0 avec la méthode de Newton-Raphson
@@ -75,7 +85,7 @@ def newtonRaphson(f, a):
     anti_bug = 0        # évite la possibilité d'osciller entre deux points
     try:
         # tant que la valeur f(a) n'est pas proche de 0 (ou que anti-bug est pas trop élevé)
-        while abs(f(a)) > h/100 and anti_bug < 1000:
+        while abs(f(a)) > h2 and anti_bug < 1000:
             # si la dérivée est nulle, retourne une erreur
             if abs(derivative(f, a)) == 0:
                 return "Erreur"
@@ -86,7 +96,7 @@ def newtonRaphson(f, a):
                 # incrémentation de l'anti-bug
                 anti_bug = anti_bug + 1
         # si il n'y a pas d'oscillation
-        if anti_bug < 1000 and abs(f(a)) < h/100:
+        if anti_bug < 1000 and abs(f(a)) < h2:
             # si on arrive ici, alors ça veut dire que f(a) est nulle, donc c'est un zero
             return a
         # si il y a une oscillation, retourne une erreur
@@ -155,7 +165,7 @@ def dichotomie(f, a, b):
         # try est nécessaire pour éviter le cas où f((a+b)/2) est nan
         try:
             # tant que f((a+b)/2) n'est un zéro, on continue de chercher
-            while abs(f((a+b)/2))>h/100:
+            while abs(f((a+b)/2))>h2:
                 # si f((a+b)/2) est inférieur à zéro, ...
                 if f((a+b)/2)<0:
                     # ... et f(a) inférieur à zéro, alors a doit se rapprocher plus de b
@@ -178,7 +188,7 @@ def dichotomie(f, a, b):
         # si f((a+b)/2) est un nan
         except:
             # on incrémente a un tout petit peu, pour éviter une erreur à la prochaine tentative
-            a += h
+            a += h1
             # incrémentation du nombre d'essais loupés par 1
             anti_bug += 1
 
