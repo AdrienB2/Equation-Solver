@@ -1,6 +1,6 @@
 # Projet de mathématiques - Gymnase de Renens
 
-Ce projet a été créé dans le cadre d'un cours d'application des maths au Gymnase de Renens par la classe 3M05 en 2022. Il permet de résoudre des équations en utilisant la méthode de Newton-Raphson ou la dichotomie.
+Ce projet a été créé dans le cadre d'un cours d'application des maths au Gymnase de Renens par la classe 3M05 en 2022. Il permet de résoudre des équations à une variable en utilisant la méthode de Newton-Raphson ou la dichotomie.
 
 ## Fonctionnalités
 
