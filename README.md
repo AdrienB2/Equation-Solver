@@ -1,6 +1,6 @@
 # Projet de mathématiques - Gymnase de Renens
 
-Ce projet a été créé dans le cadre d'un cours d'application des maths au Gymnase de Renens par la classe 3M05 en 2022. Il permet de résoudre des équations à une variable en utilisant la méthode de Newton-Raphson ou la dichotomie.
+Ce projet a été créé dans le cadre d'un cours d'application des maths au Gymnase de Renens par la classe 3M05 en 2022. Il permet de trouver les 0 d'une fonction à une variable en utilisant la méthode de Newton-Raphson ou la dichotomie.
 
 ## Fonctionnalités
 
@@ -27,7 +27,7 @@ python main.py
 Pour écrire une équation, utilisez la syntaxe suivante:
 
 ````
-x^2 + 2*x - 3 = 0
+x^2 + 2*x - 3
 ````
-Vous pouvez utiliser les opérateurs `+`, `-`, `*`, `/`, `^` et les fonctions `sin`, `cos`, `tan`, `exp`, `log`, `ln`, `sqrt`, `exp`.
+Vous pouvez utiliser les opérateurs `+`, `-`, `*`, `/`, `^`, `(`, `)` et les fonctions `sin`, `cos`, `tan`, `exp`, `log`, `ln`, `sqrt`, `exp`.
 Et les constantes `pi` et `e`.
